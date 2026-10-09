@@ -1,0 +1,36 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "keepjson",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-01",
+  "observability": { "enabled": true },
+
+  // Replace database_id with the id printed by `wrangler d1 create keepjson`.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "keepjson",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ],
+
+  // namespace_id must be unique per rate limiter within your Cloudflare account.
+  // period can only be 10 or 60 seconds.
+  "ratelimits": [
+    { "name": "CREATE_LIMITER", "namespace_id": "1001", "simple": { "limit": 10, "period": 60 } },
+    { "name": "WRITE_LIMITER", "namespace_id": "1002", "simple": { "limit": 60, "period": 60 } }
+  ],
+
+  // Hourly sweep of expired Bins.
+  "triggers": { "crons": ["0 * * * *"] },
+
+  // Instance configuration: see docs/api.md → Instance configuration.
+  "vars": {
+    "MAX_BIN_BYTES": "102400",
+    "DEFAULT_TTL_SECONDS": "0",
+    "MAX_TTL_SECONDS": "0",
+    "CORS_ORIGINS": "*",
+    "RATE_LIMIT_ENABLED": "true"
+  }
+}

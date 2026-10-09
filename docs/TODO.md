@@ -5,15 +5,15 @@ Do these in order. Each task is a thin end-to-end slice: test first, implement, 
 ---
 
 ## 0. Scaffold
-- [ ] `package.json` (pnpm, `"type": "module"`), with scripts `dev`, `deploy`, `test`, `typecheck`, `lint`, `format`, `check`, `db:migrate:local`
-- [ ] TypeScript strict; `@cloudflare/workers-types` (or `wrangler types`) for the `Env` type
-- [ ] Dependencies: `hono`, `@hono/zod-openapi`, `zod`, `nanoid`; dev: `wrangler`, `vitest`, `@cloudflare/vitest-pool-workers`, `@biomejs/biome`, `typescript`
-- [ ] `wrangler.jsonc` with: D1 binding `DB`, `migrations_dir: "migrations"`, rate-limit bindings `CREATE_LIMITER` / `WRITE_LIMITER`, cron trigger `0 * * * *`, and the `vars` from api.md → Instance configuration
-- [ ] `src/index.ts` exports `{ fetch, scheduled }`, using an `OpenAPIHono` app
-- [ ] `src/config.ts` parses `vars` into a typed config with zod (defaults applied; rejects `MAX_BIN_BYTES > 1_000_000`)
-- [ ] `GET /health` → `200 {"status":"ok"}`
-- [ ] Vitest with the pool-workers config; one test covering `/health` and one covering config parsing
-- [ ] `biome.json`; `.github/workflows/ci.yml` running `pnpm install --frozen-lockfile && pnpm check` on push/PR
+- [x] `package.json` (pnpm, `"type": "module"`), with scripts `dev`, `deploy`, `test`, `typecheck`, `lint`, `format`, `check`, `db:migrate:local`
+- [x] TypeScript strict; `wrangler types` (`pnpm typegen`) for the `Env` type
+- [x] Dependencies: `hono`, `@hono/zod-openapi`, `zod`, `nanoid`; dev: `wrangler`, `vitest`, `@cloudflare/vitest-plugin` (the renamed `@cloudflare/vitest-pool-workers`), `@biomejs/biome`, `typescript`
+- [x] `wrangler.jsonc` with: D1 binding `DB`, `migrations_dir: "migrations"`, rate-limit bindings `CREATE_LIMITER` / `WRITE_LIMITER`, cron trigger `0 * * * *`, and the `vars` from api.md → Instance configuration
+- [x] `src/index.ts` exports `{ fetch, scheduled }`, using an `OpenAPIHono` app
+- [x] `src/config.ts` parses `vars` into a typed config with zod (defaults applied; rejects `MAX_BIN_BYTES > 1_000_000`)
+- [x] `GET /health` → `200 {"status":"ok"}`
+- [x] Vitest with the pool-workers config; one test covering `/health` and one covering config parsing
+- [x] `biome.json`; `.github/workflows/ci.yml` running `pnpm install --frozen-lockfile && pnpm check` on push/PR
 
 **Done when:** `pnpm check` passes from a fresh clone and `pnpm dev` serves `/health`.
 
