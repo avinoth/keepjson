@@ -31,9 +31,9 @@ Do these in order. Each task is a thin end-to-end slice: test first, implement, 
 - [x] Tests: happy path (object and array, including empty), each error code, a body exactly at the limit and one byte over
 
 ## 3. Read a public Bin, `GET /bins/:id`
-- [ ] Returns the stored body byte-for-byte, `Content-Type: application/json; charset=utf-8`, metadata headers, `Cache-Control: no-store`
-- [ ] `404 not_found` for an unknown id and for a malformed id
-- [ ] Tests: round trip create → read (content, whitespace and key order preserved), 404 cases
+- [x] Returns the stored body byte-for-byte, `Content-Type: application/json; charset=utf-8`, metadata headers, `Cache-Control: no-store`
+- [x] `404 not_found` for an unknown id and for a malformed id
+- [x] Tests: round trip create → read (content, whitespace and key order preserved), 404 cases
 
 ## 4. Private Bins
 - [ ] `X-Bin-Private: true` on create → `readKey` (`kj_r_…`) in the response, its hash stored, `private: true`

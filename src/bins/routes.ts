@@ -1,9 +1,10 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { type AppEnv, withConfig } from "../context";
+import { ApiError } from "../errors";
 import { parseBinBody } from "./body";
-import { generateBinId, generateWriteKey, hashKey } from "./keys";
+import { generateBinId, generateWriteKey, hashKey, isValidBinId } from "./keys";
 import { binMetadataHeaders, toIso } from "./metadata";
-import { type Bin, insert } from "./repository";
+import { type Bin, findLive, insert } from "./repository";
 
 export const binRoutes = new OpenAPIHono<AppEnv>();
 
@@ -39,3 +40,23 @@ binRoutes.post("/", async (c) => {
     { Location: `/bins/${bin.id}`, ...binMetadataHeaders(bin) },
   );
 });
+
+binRoutes.get("/:id", async (c) => {
+  const bin = await findLiveBin(c.env.DB, c.req.param("id"), Date.now());
+  // Private Bins (TODO §4) will check the Authorization header here.
+
+  return c.body(bin.content, 200, {
+    "Content-Type": "application/json; charset=utf-8",
+    ...binMetadataHeaders(bin),
+  });
+});
+
+/**
+ * The live Bin with this id. Throws `404 not_found` for a malformed id (without asking D1), an unknown id
+ * or an expired Bin, which can't be told apart.
+ */
+async function findLiveBin(db: D1Database, id: string, now: number): Promise<Bin> {
+  const bin = isValidBinId(id) ? await findLive(db, id, now) : null;
+  if (!bin) throw new ApiError(404, "not_found", "Bin not found");
+  return bin;
+}
