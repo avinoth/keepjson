@@ -36,10 +36,10 @@ Do these in order. Each task is a thin end-to-end slice: test first, implement, 
 - [x] Tests: round trip create → read (content, whitespace and key order preserved), 404 cases
 
 ## 4. Private Bins
-- [ ] `X-Bin-Private: true` on create → `readKey` (`kj_r_…`) in the response, its hash stored, `private: true`
-- [ ] GET on a Private Bin: no key → 401; wrong key → 403; Read Key → 200; Write Key → 200
-- [ ] A public Bin ignores any `Authorization` header on GET
-- [ ] Tests for every case above
+- [x] `X-Bin-Private: true` on create → `readKey` (`kj_r_…`) in the response, its hash stored, `private: true`
+- [x] GET on a Private Bin: no key → 401; wrong key → 403; Read Key → 200; Write Key → 200
+- [x] A public Bin ignores any `Authorization` header on GET
+- [x] Tests for every case above
 
 ## 5. Replace a Bin, `PUT /bins/:id`
 - [ ] Needs the Write Key; a Read Key → 403; no key → 401; unknown → 404
