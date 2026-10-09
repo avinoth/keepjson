@@ -9,7 +9,7 @@ keepjson is a Hono app on Cloudflare Workers + D1 that stores JSON Bins without 
 
 ## How to work
 
-- Write the tests first. Tests run in `@cloudflare/vitest-pool-workers` against a real local D1. Don't mock D1.
+- Write the tests first. Tests run in `@cloudflare/vitest-plugin` (formerly `@cloudflare/vitest-pool-workers`) against a real local D1. Don't mock D1.
 - One TODO task = one commit. Tick its boxes in `docs/TODO.md` in that same commit.
 - `pnpm check` must pass before you commit.
 - All SQL goes in `src/bins/repository.ts`. Handlers don't build SQL.
