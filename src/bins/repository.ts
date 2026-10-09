@@ -62,9 +62,9 @@ export async function replaceContent(db: D1Database, id: string, content: string
   return result.meta.changes > 0;
 }
 
-/** Deletes a Bin. Returns false if no Bin has this id. */
-export async function remove(db: D1Database, id: string): Promise<boolean> {
-  const result = await db.prepare("DELETE FROM bins WHERE id = ?").bind(id).run();
+/** Deletes a live Bin. Returns false if no live Bin has this id (an expired one is left for the sweep). */
+export async function remove(db: D1Database, id: string, now: number): Promise<boolean> {
+  const result = await db.prepare(`DELETE FROM bins WHERE id = ? AND ${LIVE}`).bind(id, now).run();
   return result.meta.changes > 0;
 }
 

@@ -3,6 +3,7 @@ import { type AppEnv, withConfig } from "../context";
 import { ApiError } from "../errors";
 import { requireKey } from "./auth";
 import { parseBinBody } from "./body";
+import { resolveExpiresAt } from "./expiry";
 import { generateBinId, generateReadKey, generateWriteKey, hashKey, isValidBinId } from "./keys";
 import { binMetadataHeaders, toIso } from "./metadata";
 import { type Bin, findLive, insert, remove, replaceContent } from "./repository";
@@ -12,9 +13,12 @@ export const binRoutes = new OpenAPIHono<AppEnv>();
 binRoutes.use(withConfig);
 
 binRoutes.post("/", async (c) => {
+  const now = Date.now();
+  // X-Bin-TTL is checked before the body (docs/api.md → Validation and errors): it is a header, so a bad one is
+  // rejected without reading the body, and parseBinBody stays the same for PUT, which ignores X-Bin-TTL.
+  const expiresAt = resolveExpiresAt(c.req.header("X-Bin-TTL"), c.var.config, now);
   const content = await parseBinBody(c.req.raw, c.var.config);
 
-  const now = Date.now();
   const writeKey = generateWriteKey();
   const isPrivate = isPrivateHeader(c.req.header("X-Bin-Private"));
   const readKey = isPrivate ? generateReadKey() : null;
@@ -24,10 +28,9 @@ binRoutes.post("/", async (c) => {
     isPrivate,
     writeKeyHash: await hashKey(writeKey),
     readKeyHash: readKey === null ? null : await hashKey(readKey),
-    // Expiry (TODO §7) is not implemented yet.
     createdAt: now,
     updatedAt: now,
-    expiresAt: null,
+    expiresAt,
   };
   await insert(c.env.DB, bin);
 
@@ -85,8 +88,8 @@ binRoutes.delete("/:id", async (c) => {
   const bin = await findLiveBin(c.env.DB, c.req.param("id"), Date.now());
   await requireKey(c, bin, "write");
 
-  // Another request can delete the Bin between the lookup and this call; that is a 404 like any other.
-  if (!(await remove(c.env.DB, bin.id))) throw new ApiError(404, "not_found", "Bin not found");
+  // The Bin can be deleted by another request or expire between the lookup and this call; that is a 404 like any other.
+  if (!(await remove(c.env.DB, bin.id, Date.now()))) throw new ApiError(404, "not_found", "Bin not found");
 
   return c.body(null, 204);
 });

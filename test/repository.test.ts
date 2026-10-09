@@ -94,17 +94,36 @@ describe("remove", () => {
     const bin = makeBin();
     await insert(env.DB, bin);
 
-    expect(await remove(env.DB, bin.id)).toBe(true);
+    expect(await remove(env.DB, bin.id, NOW)).toBe(true);
     expect(await findLive(env.DB, bin.id, NOW)).toBeNull();
+    expect(await countBins()).toBe(0);
+  });
+
+  it("deletes a Bin whose Expiry is still ahead", async () => {
+    const bin = makeBin({ expiresAt: NOW + 1 });
+    await insert(env.DB, bin);
+
+    expect(await remove(env.DB, bin.id, NOW)).toBe(true);
     expect(await countBins()).toBe(0);
   });
 
   it("reports false when nothing was deleted", async () => {
     const bin = makeBin();
     await insert(env.DB, bin);
-    await remove(env.DB, bin.id);
+    await remove(env.DB, bin.id, NOW);
 
-    expect(await remove(env.DB, bin.id)).toBe(false);
+    expect(await remove(env.DB, bin.id, NOW)).toBe(false);
+  });
+
+  it("does not touch an expired Bin", async () => {
+    const atNow = makeBin({ expiresAt: NOW });
+    const earlier = makeBin({ expiresAt: NOW - HOUR });
+    await insert(env.DB, atNow);
+    await insert(env.DB, earlier);
+
+    expect(await remove(env.DB, atNow.id, NOW)).toBe(false);
+    expect(await remove(env.DB, earlier.id, NOW)).toBe(false);
+    expect(await countBins()).toBe(2);
   });
 });
 

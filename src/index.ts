@@ -1,4 +1,5 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
+import { sweepExpired } from "./bins/expiry";
 import { binRoutes } from "./bins/routes";
 import type { AppEnv } from "./context";
 import { ApiError, errorResponse } from "./errors";
@@ -26,6 +27,9 @@ app.onError((err, c) => {
 
 export default {
   fetch: app.fetch,
-  // The Expiry sweep is added in TODO §7.
-  async scheduled(_controller, _env, _ctx) {},
+  // The hourly Cron Trigger: deletes expired Bins (docs/api.md → Expiry rules). Requests already treat them as gone.
+  async scheduled(_controller, env, _ctx) {
+    const deleted = await sweepExpired(env.DB, Date.now());
+    console.log(`Expiry sweep deleted ${deleted} Bins`);
+  },
 } satisfies ExportedHandler<Env>;

@@ -78,7 +78,7 @@ Browsers can read all of these via `Access-Control-Expose-Headers`, along with `
 
 ## Validation and errors
 
-Check in this order: route/id → auth (non-create routes) → content type → size → JSON parse → top-level type.
+Check in this order: route/id → auth (non-create routes) → `X-Bin-TTL` (create only) → content type → size → JSON parse → top-level type. `X-Bin-TTL` is a header, so a bad one is rejected before any of the body is read.
 
 | Status | `code` | When |
 |---|---|---|
@@ -104,7 +104,7 @@ Check in this order: route/id → auth (non-create routes) → content type → 
 
 Instance variables: `DEFAULT_TTL_SECONDS` and `MAX_TTL_SECONDS`. `0` or unset means no default or no maximum.
 
-1. If `X-Bin-TTL` is sent and is `≤ MAX_TTL_SECONDS` (or there is no maximum), Expiry = `now + TTL`. If it's above the maximum → `400 invalid_ttl`.
+1. If `X-Bin-TTL` is sent and is `≤ MAX_TTL_SECONDS` (or there is no maximum), Expiry = `now + TTL`. If it's above the maximum → `400 invalid_ttl`. The value must be ASCII digits only (surrounding whitespace ignored): no sign, decimal point or exponent, not `0`, and not empty. A TTL too large to be an exact integer, or one that puts the Expiry past the latest representable timestamp, is also `400 invalid_ttl`.
 2. With no header: if a default is set, use it; otherwise, if a maximum is set, use the maximum; otherwise the Bin never expires.
 3. Requests check whether the Bin has expired (`expires_at <= now` → `404`), so a Bin is never served after its Expiry even before it is deleted.
 4. An hourly Cron Trigger (`0 * * * *`) deletes expired rows in batches (`LIMIT 500` per statement, looping until none are left or the time budget runs out).
