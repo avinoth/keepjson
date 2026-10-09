@@ -1,7 +1,8 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { sweepExpired } from "./bins/expiry";
 import { binRoutes } from "./bins/routes";
-import type { AppEnv } from "./context";
+import { type AppEnv, withConfig } from "./context";
+import { withCors } from "./cors";
 import { ApiError, errorResponse } from "./errors";
 
 export const app = new OpenAPIHono<AppEnv>();
@@ -11,6 +12,11 @@ app.use(async (c, next) => {
   await next();
   c.header("Cache-Control", "no-store");
 });
+
+// Before the routes, so every response carries the CORS headers, errors from notFound and onError included, and
+// preflights are answered before any route-level middleware such as the rate limiter.
+app.use(withConfig);
+app.use(withCors);
 
 app.get("/health", (c) => c.json({ status: "ok" }));
 

@@ -74,7 +74,7 @@ There is no listing endpoint (ADR 0002), and no PATCH, ETag/If-Match, version hi
 | `X-Bin-Updated-At` | ISO timestamp |
 | `X-Bin-Expires-At` | ISO timestamp. Left out when the Bin has no Expiry. |
 
-Browsers can read all of these via `Access-Control-Expose-Headers`, along with `Location`.
+Browsers can read all of these via `Access-Control-Expose-Headers`, along with `Location` and `Retry-After` (see [CORS](#cors)).
 
 ## Validation and errors
 
@@ -122,7 +122,15 @@ Reads have no limit in the MVP. Setting `RATE_LIMIT_ENABLED=false` turns both of
 
 ## CORS
 
-`CORS_ORIGINS` is `*` (the default) or a comma-separated allowlist. Allowed methods: `GET, POST, PUT, DELETE, OPTIONS`. Allowed headers: `Authorization, Content-Type, X-Bin-Private, X-Bin-TTL`. The docs must warn that a Write Key embedded in frontend code gives every visitor write access.
+`CORS_ORIGINS` is `*` (the default) or a comma-separated allowlist. Every response, errors included, carries the CORS headers.
+
+- `*` → `Access-Control-Allow-Origin: *`. An allowlist → the request's `Origin` is echoed back only if it exactly matches an entry; otherwise no `Access-Control-Allow-Origin` is sent. Responses send `Vary: Origin`.
+- Allowed methods: `GET, POST, PUT, DELETE, OPTIONS`. Allowed headers: `Authorization, Content-Type, X-Bin-Private, X-Bin-TTL`.
+- Exposed headers: `X-Bin-Id, X-Bin-Private, X-Bin-Created-At, X-Bin-Updated-At, X-Bin-Expires-At, Location, Retry-After`. `Retry-After` isn't CORS-safelisted, so without it a browser couldn't read how long to wait after a `429`.
+- No `Access-Control-Allow-Credentials`: keys are sent in the `Authorization` header, not in cookies.
+- Preflight `OPTIONS` requests get `204` with the allow headers. They aren't rate limited and don't touch D1.
+
+The docs must warn that a Write Key embedded in frontend code gives every visitor write access.
 
 ## Instance configuration (`vars`)
 
