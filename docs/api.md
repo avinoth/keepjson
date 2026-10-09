@@ -24,7 +24,7 @@ This is what the MVP implements. Terms (Bin, Write Key, Read Key, Private Bin, E
 | Request header | Meaning |
 |---|---|
 | `Content-Type: application/json` | Required. Anything else → `415 unsupported_media_type`. |
-| `X-Bin-Private: true` | Optional. Makes a Private Bin and issues a Read Key. Fixed at creation. |
+| `X-Bin-Private: true` | Optional. Makes a Private Bin and issues a Read Key. Fixed at creation. Only `true` (any case, surrounding whitespace ignored) does this; any other value makes a public Bin. |
 | `X-Bin-TTL: <seconds>` | Optional positive integer. Sets the Expiry to `now + TTL`. See [Expiry rules](#expiry-rules). |
 
 Body: the JSON to store. It must be an object or an array (empty is allowed).
