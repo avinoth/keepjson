@@ -18,11 +18,11 @@ Do these in order. Each task is a thin end-to-end slice: test first, implement, 
 **Done when:** `pnpm check` passes from a fresh clone and `pnpm dev` serves `/health`.
 
 ## 1. Schema and repository
-- [ ] `migrations/0001_bins.sql` exactly as drafted in api.md → Storage
-- [ ] Tests apply the migrations to the local D1 (via `applyD1Migrations` in the vitest setup)
-- [ ] `src/bins/repository.ts`: `insert`, `findLive(id, now)` (leaves out expired Bins), `replaceContent`, `remove`, `deleteExpired(now, limit)`
-- [ ] `src/bins/keys.ts`: generate Write/Read Keys and ids, `hashKey`, constant-time `matches`
-- [ ] Unit tests: the repository against real local D1; key format/prefix/hash; `findLive` doesn't return an expired row
+- [x] `migrations/0001_bins.sql` exactly as drafted in api.md → Storage
+- [x] Tests apply the migrations to the local D1 (via `applyD1Migrations` in the vitest setup)
+- [x] `src/bins/repository.ts`: `insert`, `findLive(id, now)` (leaves out expired Bins), `replaceContent`, `remove`, `deleteExpired(now, limit)`
+- [x] `src/bins/keys.ts`: generate Write/Read Keys and ids, `hashKey`, constant-time `matches`
+- [x] Unit tests: the repository against real local D1; key format/prefix/hash; `findLive` doesn't return an expired row
 
 ## 2. Create a Bin, `POST /bins`
 - [ ] Validation pipeline as in api.md (415 → 413 → 400 → 422), with a reusable `parseBinBody(request, config)`
