@@ -78,7 +78,7 @@ Browsers can read all of these via `Access-Control-Expose-Headers`, along with `
 
 ## Validation and errors
 
-Check in this order: route/id → auth (non-create routes) → `X-Bin-TTL` (create only) → content type → size → JSON parse → top-level type. `X-Bin-TTL` is a header, so a bad one is rejected before any of the body is read.
+Check in this order: rate limit (`POST`, `PUT`, `DELETE`) → route/id → auth (non-create routes) → `X-Bin-TTL` (create only) → content type → size → JSON parse → top-level type. The rate limit comes first because it protects the Worker: a limited client gets no D1 lookup, key check or body parsing. `X-Bin-TTL` is a header, so a bad one is rejected before any of the body is read.
 
 | Status | `code` | When |
 |---|---|---|
@@ -116,6 +116,9 @@ Two Workers Rate Limiting bindings, keyed on `CF-Connecting-IP`:
 - `WRITE_LIMITER` for `PUT` and `DELETE`
 
 Reads have no limit in the MVP. Setting `RATE_LIMIT_ENABLED=false` turns both off. The binding's period can only be 10 s or 60 s.
+
+- Over the limit → `429 rate_limited` with `Retry-After: <seconds>`. A binding can't report when its window resets, so `Retry-After` is the binding's whole period (60 s).
+- Requests without `CF-Connecting-IP` (Cloudflare always sends it) share a single bucket, keyed `unknown`, rather than going unlimited.
 
 ## CORS
 

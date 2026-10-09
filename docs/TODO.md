@@ -59,9 +59,9 @@ Do these in order. Each task is a thin end-to-end slice: test first, implement, 
 - [x] Tests: each TTL rule, invalid TTLs, a lazy 404 with a faked clock, the sweep deleting only expired rows
 
 ## 8. Rate limiting
-- [ ] Middleware applies `CREATE_LIMITER` to POST and `WRITE_LIMITER` to PUT/DELETE, keyed on `CF-Connecting-IP`
-- [ ] Over the limit → `429 rate_limited` + `Retry-After`; `RATE_LIMIT_ENABLED=false` skips the check
-- [ ] Tests: use a stub limiter binding to check both branches and the disabled flag
+- [x] Middleware applies `CREATE_LIMITER` to POST and `WRITE_LIMITER` to PUT/DELETE, keyed on `CF-Connecting-IP`
+- [x] Over the limit → `429 rate_limited` + `Retry-After`; `RATE_LIMIT_ENABLED=false` skips the check
+- [x] Tests: use a stub limiter binding to check both branches and the disabled flag
 
 ## 9. CORS
 - [ ] Hono `cors()` driven by `CORS_ORIGINS` (`*` or an allowlist); methods, allowed headers and exposed headers as in api.md
