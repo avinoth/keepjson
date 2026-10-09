@@ -5,7 +5,7 @@ import { requireKey } from "./auth";
 import { parseBinBody } from "./body";
 import { generateBinId, generateReadKey, generateWriteKey, hashKey, isValidBinId } from "./keys";
 import { binMetadataHeaders, toIso } from "./metadata";
-import { type Bin, findLive, insert, replaceContent } from "./repository";
+import { type Bin, findLive, insert, remove, replaceContent } from "./repository";
 
 export const binRoutes = new OpenAPIHono<AppEnv>();
 
@@ -79,6 +79,16 @@ binRoutes.put("/:id", async (c) => {
     200,
     binMetadataHeaders(replaced),
   );
+});
+
+binRoutes.delete("/:id", async (c) => {
+  const bin = await findLiveBin(c.env.DB, c.req.param("id"), Date.now());
+  await requireKey(c, bin, "write");
+
+  // Another request can delete the Bin between the lookup and this call; that is a 404 like any other.
+  if (!(await remove(c.env.DB, bin.id))) throw new ApiError(404, "not_found", "Bin not found");
+
+  return c.body(null, 204);
 });
 
 /**
