@@ -42,10 +42,10 @@ Do these in order. Each task is a thin end-to-end slice: test first, implement, 
 - [x] Tests for every case above
 
 ## 5. Replace a Bin, `PUT /bins/:id`
-- [ ] Needs the Write Key; a Read Key → 403; no key → 401; unknown → 404
-- [ ] Same body validation as create; `updated_at` changes, while `created_at`, privacy and Expiry stay the same
-- [ ] Response `200` with the metadata body and headers
-- [ ] Tests: replace then read returns the new content; `X-Bin-Private`/`X-Bin-TTL` on PUT are ignored
+- [x] Needs the Write Key; a Read Key → 403; no key → 401; unknown → 404
+- [x] Same body validation as create; `updated_at` changes, while `created_at`, privacy and Expiry stay the same
+- [x] Response `200` with the metadata body and headers
+- [x] Tests: replace then read returns the new content; `X-Bin-Private`/`X-Bin-TTL` on PUT are ignored
 
 ## 6. Delete a Bin, `DELETE /bins/:id`
 - [ ] Needs the Write Key; `204`; a later GET → 404

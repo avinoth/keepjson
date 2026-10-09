@@ -5,7 +5,7 @@ import { requireKey } from "./auth";
 import { parseBinBody } from "./body";
 import { generateBinId, generateReadKey, generateWriteKey, hashKey, isValidBinId } from "./keys";
 import { binMetadataHeaders, toIso } from "./metadata";
-import { type Bin, findLive, insert } from "./repository";
+import { type Bin, findLive, insert, replaceContent } from "./repository";
 
 export const binRoutes = new OpenAPIHono<AppEnv>();
 
@@ -54,6 +54,31 @@ binRoutes.get("/:id", async (c) => {
     "Content-Type": "application/json; charset=utf-8",
     ...binMetadataHeaders(bin),
   });
+});
+
+binRoutes.put("/:id", async (c) => {
+  const bin = await findLiveBin(c.env.DB, c.req.param("id"), Date.now());
+  // Auth comes before the body is read (docs/api.md → Validation and errors).
+  await requireKey(c, bin, "write");
+  const content = await parseBinBody(c.req.raw, c.var.config);
+
+  // Privacy and Expiry are fixed at creation, so X-Bin-Private and X-Bin-TTL are ignored here.
+  const now = Date.now();
+  // The Bin can be deleted or expire between the lookup and the update; that is a 404 like any other.
+  if (!(await replaceContent(c.env.DB, bin.id, content, now))) throw new ApiError(404, "not_found", "Bin not found");
+  const replaced: Bin = { ...bin, content, updatedAt: now };
+
+  return c.json(
+    {
+      id: replaced.id,
+      private: replaced.isPrivate,
+      createdAt: toIso(replaced.createdAt),
+      updatedAt: toIso(replaced.updatedAt),
+      expiresAt: replaced.expiresAt === null ? null : toIso(replaced.expiresAt),
+    },
+    200,
+    binMetadataHeaders(replaced),
+  );
 });
 
 /**
