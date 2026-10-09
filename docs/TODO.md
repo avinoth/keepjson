@@ -52,11 +52,11 @@ Do these in order. Each task is a thin end-to-end slice: test first, implement, 
 - [x] Tests: auth cases; deleting twice → second call 404
 
 ## 7. Expiry
-- [ ] `X-Bin-TTL` handling and the default/max rules exactly as in api.md → Expiry rules
-- [ ] An expired Bin returns 404 on GET/PUT/DELETE, even before the sweep runs
-- [ ] `scheduled` handler: loops `deleteExpired(now, 500)` until nothing is left or about 20 s have passed
-- [ ] `X-Bin-Expires-At` is sent when the Bin has an Expiry
-- [ ] Tests: each TTL rule, invalid TTLs, a lazy 404 with a faked clock, the sweep deleting only expired rows
+- [x] `X-Bin-TTL` handling and the default/max rules exactly as in api.md → Expiry rules
+- [x] An expired Bin returns 404 on GET/PUT/DELETE, even before the sweep runs
+- [x] `scheduled` handler: loops `deleteExpired(now, 500)` until nothing is left or about 20 s have passed
+- [x] `X-Bin-Expires-At` is sent when the Bin has an Expiry
+- [x] Tests: each TTL rule, invalid TTLs, a lazy 404 with a faked clock, the sweep deleting only expired rows
 
 ## 8. Rate limiting
 - [ ] Middleware applies `CREATE_LIMITER` to POST and `WRITE_LIMITER` to PUT/DELETE, keyed on `CF-Connecting-IP`
