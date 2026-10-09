@@ -1,4 +1,5 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
+import type { TypedResponse } from "hono";
 import type { AppEnv } from "../context";
 import { ApiError } from "../errors";
 import { requireKey } from "./auth";
@@ -8,15 +9,17 @@ import { generateBinId, generateReadKey, generateWriteKey, hashKey, isValidBinId
 import { binMetadataHeaders, toIso } from "./metadata";
 import { rateLimit } from "./rate-limit";
 import { type Bin, findLive, insert, remove, replaceContent } from "./repository";
+import { type BinContent, createBinRoute, deleteBinRoute, readBinRoute, replaceBinRoute } from "./spec";
 
 export const binRoutes = new OpenAPIHono<AppEnv>();
 
 // Rate limiting comes first, before the id, auth and body checks (docs/api.md → Validation and errors): it protects
-// the Worker, so a limited client shouldn't get D1 lookups, key hashing or body parsing. Reads aren't limited.
+// the Worker, so a limited client shouldn't get D1 lookups, key hashing or body parsing. Reads aren't limited. These
+// are registered before the routes below, so they run before their handlers.
 binRoutes.post("/", rateLimit("CREATE_LIMITER"));
 binRoutes.on(["PUT", "DELETE"], "/:id", rateLimit("WRITE_LIMITER"));
 
-binRoutes.post("/", async (c) => {
+binRoutes.openapi(createBinRoute, async (c) => {
   const now = Date.now();
   // X-Bin-TTL is checked before the body (docs/api.md → Validation and errors): it is a header, so a bad one is
   // rejected without reading the body, and parseBinBody stays the same for PUT, which ignores X-Bin-TTL.
@@ -53,17 +56,19 @@ binRoutes.post("/", async (c) => {
   );
 });
 
-binRoutes.get("/:id", async (c) => {
+binRoutes.openapi(readBinRoute, async (c) => {
   const bin = await findLiveBin(c.env.DB, c.req.param("id"), Date.now());
   await requireKey(c, bin, "read");
 
-  return c.body(bin.content, 200, {
+  // The stored text is sent as is, which c.json can't do: it would re-serialize it. It is the JSON the route describes.
+  const res = c.body(bin.content, 200, {
     "Content-Type": "application/json; charset=utf-8",
     ...binMetadataHeaders(bin),
   });
+  return res as typeof res & TypedResponse<BinContent, 200, "json">;
 });
 
-binRoutes.put("/:id", async (c) => {
+binRoutes.openapi(replaceBinRoute, async (c) => {
   const bin = await findLiveBin(c.env.DB, c.req.param("id"), Date.now());
   // Auth comes before the body is read (docs/api.md → Validation and errors).
   await requireKey(c, bin, "write");
@@ -88,7 +93,7 @@ binRoutes.put("/:id", async (c) => {
   );
 });
 
-binRoutes.delete("/:id", async (c) => {
+binRoutes.openapi(deleteBinRoute, async (c) => {
   const bin = await findLiveBin(c.env.DB, c.req.param("id"), Date.now());
   await requireKey(c, bin, "write");
 
