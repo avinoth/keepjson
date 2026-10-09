@@ -1,0 +1,79 @@
+# keepjson TODO
+
+Do these in order. Each task is a thin end-to-end slice: test first, implement, tick the box, then commit, raise a PR. The contract is in [`api.md`](./api.md), the vocabulary in [`../CONTEXT.md`](../CONTEXT.md). A task is done only when every acceptance criterion is ticked and `pnpm check` (typecheck + lint + test) passes.
+
+---
+
+## 0. Scaffold
+- [ ] `package.json` (pnpm, `"type": "module"`), with scripts `dev`, `deploy`, `test`, `typecheck`, `lint`, `format`, `check`, `db:migrate:local`
+- [ ] TypeScript strict; `@cloudflare/workers-types` (or `wrangler types`) for the `Env` type
+- [ ] Dependencies: `hono`, `@hono/zod-openapi`, `zod`, `nanoid`; dev: `wrangler`, `vitest`, `@cloudflare/vitest-pool-workers`, `@biomejs/biome`, `typescript`
+- [ ] `wrangler.jsonc` with: D1 binding `DB`, `migrations_dir: "migrations"`, rate-limit bindings `CREATE_LIMITER` / `WRITE_LIMITER`, cron trigger `0 * * * *`, and the `vars` from api.md → Instance configuration
+- [ ] `src/index.ts` exports `{ fetch, scheduled }`, using an `OpenAPIHono` app
+- [ ] `src/config.ts` parses `vars` into a typed config with zod (defaults applied; rejects `MAX_BIN_BYTES > 1_000_000`)
+- [ ] `GET /health` → `200 {"status":"ok"}`
+- [ ] Vitest with the pool-workers config; one test covering `/health` and one covering config parsing
+- [ ] `biome.json`; `.github/workflows/ci.yml` running `pnpm install --frozen-lockfile && pnpm check` on push/PR
+
+**Done when:** `pnpm check` passes from a fresh clone and `pnpm dev` serves `/health`.
+
+## 1. Schema and repository
+- [ ] `migrations/0001_bins.sql` exactly as drafted in api.md → Storage
+- [ ] Tests apply the migrations to the local D1 (via `applyD1Migrations` in the vitest setup)
+- [ ] `src/bins/repository.ts`: `insert`, `findLive(id, now)` (leaves out expired Bins), `replaceContent`, `remove`, `deleteExpired(now, limit)`
+- [ ] `src/bins/keys.ts`: generate Write/Read Keys and ids, `hashKey`, constant-time `matches`
+- [ ] Unit tests: the repository against real local D1; key format/prefix/hash; `findLive` doesn't return an expired row
+
+## 2. Create a Bin, `POST /bins`
+- [ ] Validation pipeline as in api.md (415 → 413 → 400 → 422), with a reusable `parseBinBody(request, config)`
+- [ ] Returns `201` with `Location`, metadata headers and the documented JSON body; `writeKey` matches `^kj_w_`
+- [ ] Only the key hash is stored (a test checks that the row contains no plaintext key)
+- [ ] Tests: happy path (object and array, including empty), each error code, a body exactly at the limit and one byte over
+
+## 3. Read a public Bin, `GET /bins/:id`
+- [ ] Returns the stored body byte-for-byte, `Content-Type: application/json; charset=utf-8`, metadata headers, `Cache-Control: no-store`
+- [ ] `404 not_found` for an unknown id and for a malformed id
+- [ ] Tests: round trip create → read (content, whitespace and key order preserved), 404 cases
+
+## 4. Private Bins
+- [ ] `X-Bin-Private: true` on create → `readKey` (`kj_r_…`) in the response, its hash stored, `private: true`
+- [ ] GET on a Private Bin: no key → 401; wrong key → 403; Read Key → 200; Write Key → 200
+- [ ] A public Bin ignores any `Authorization` header on GET
+- [ ] Tests for every case above
+
+## 5. Replace a Bin, `PUT /bins/:id`
+- [ ] Needs the Write Key; a Read Key → 403; no key → 401; unknown → 404
+- [ ] Same body validation as create; `updated_at` changes, while `created_at`, privacy and Expiry stay the same
+- [ ] Response `200` with the metadata body and headers
+- [ ] Tests: replace then read returns the new content; `X-Bin-Private`/`X-Bin-TTL` on PUT are ignored
+
+## 6. Delete a Bin, `DELETE /bins/:id`
+- [ ] Needs the Write Key; `204`; a later GET → 404
+- [ ] Tests: auth cases; deleting twice → second call 404
+
+## 7. Expiry
+- [ ] `X-Bin-TTL` handling and the default/max rules exactly as in api.md → Expiry rules
+- [ ] An expired Bin returns 404 on GET/PUT/DELETE, even before the sweep runs
+- [ ] `scheduled` handler: loops `deleteExpired(now, 500)` until nothing is left or about 20 s have passed
+- [ ] `X-Bin-Expires-At` is sent when the Bin has an Expiry
+- [ ] Tests: each TTL rule, invalid TTLs, a lazy 404 with a faked clock, the sweep deleting only expired rows
+
+## 8. Rate limiting
+- [ ] Middleware applies `CREATE_LIMITER` to POST and `WRITE_LIMITER` to PUT/DELETE, keyed on `CF-Connecting-IP`
+- [ ] Over the limit → `429 rate_limited` + `Retry-After`; `RATE_LIMIT_ENABLED=false` skips the check
+- [ ] Tests: use a stub limiter binding to check both branches and the disabled flag
+
+## 9. CORS
+- [ ] Hono `cors()` driven by `CORS_ORIGINS` (`*` or an allowlist); methods, allowed headers and exposed headers as in api.md
+- [ ] Tests: preflight on `/bins` and `/bins/:id`; a disallowed origin gets no ACAO header; `X-Bin-*` headers are exposed
+
+## 10. OpenAPI
+- [ ] Every route is defined with `createRoute` (request headers, bodies and all error responses described)
+- [ ] `GET /openapi.json` serves the spec; `GET /docs` serves a Swagger UI or Scalar page
+- [ ] Test: the spec is valid and lists every route in api.md
+
+## 11. Self-hosting docs and demo
+- [ ] README: quick start with curl examples (create/read/replace/delete, private, TTL); a "Deploy to Cloudflare" button
+- [ ] `docs/self-hosting.md`: create the D1 database, run migrations, set vars, deploy, update
+- [ ] The README warns about putting Write Keys in frontend code
+- [ ] A `demo` environment in `wrangler.jsonc` with the demo Instance values from api.md
