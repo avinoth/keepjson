@@ -27,7 +27,7 @@ export type Config = {
 };
 
 /** Parses the Instance's `vars`. Throws if a var is invalid. */
-export function parseConfig(vars: Record<string, unknown>): Config {
+export function parseConfig(vars: object): Config {
   // An empty var means "unset", so its default applies.
   const present = Object.fromEntries(Object.entries(vars).filter(([, v]) => v !== undefined && v !== ""));
   const parsed = configSchema.parse(present);

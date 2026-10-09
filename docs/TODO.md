@@ -25,10 +25,10 @@ Do these in order. Each task is a thin end-to-end slice: test first, implement, 
 - [x] Unit tests: the repository against real local D1; key format/prefix/hash; `findLive` doesn't return an expired row
 
 ## 2. Create a Bin, `POST /bins`
-- [ ] Validation pipeline as in api.md (415 → 413 → 400 → 422), with a reusable `parseBinBody(request, config)`
-- [ ] Returns `201` with `Location`, metadata headers and the documented JSON body; `writeKey` matches `^kj_w_`
-- [ ] Only the key hash is stored (a test checks that the row contains no plaintext key)
-- [ ] Tests: happy path (object and array, including empty), each error code, a body exactly at the limit and one byte over
+- [x] Validation pipeline as in api.md (415 → 413 → 400 → 422), with a reusable `parseBinBody(request, config)`
+- [x] Returns `201` with `Location`, metadata headers and the documented JSON body; `writeKey` matches `^kj_w_`
+- [x] Only the key hash is stored (a test checks that the row contains no plaintext key)
+- [x] Tests: happy path (object and array, including empty), each error code, a body exactly at the limit and one byte over
 
 ## 3. Read a public Bin, `GET /bins/:id`
 - [ ] Returns the stored body byte-for-byte, `Content-Type: application/json; charset=utf-8`, metadata headers, `Cache-Control: no-store`

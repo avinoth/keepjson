@@ -91,6 +91,7 @@ Check in this order: route/id → auth (non-create routes) → content type → 
 | 415 | `unsupported_media_type` | `Content-Type` isn't `application/json` |
 | 422 | `invalid_top_level` | Valid JSON, but not an object or array |
 | 429 | `rate_limited` | Rate limit exceeded. Send `Retry-After`. |
+| 500 | `internal_error` | An unexpected server error. The details are not returned or logged, since a request can carry keys. |
 
 ## Ids and keys
 
