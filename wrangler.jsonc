@@ -32,5 +32,37 @@
     "MAX_TTL_SECONDS": "0",
     "CORS_ORIGINS": "*",
     "RATE_LIMIT_ENABLED": "true"
+  },
+
+  // The demo Instance (docs/api.md → Instance configuration): `pnpm exec wrangler deploy --env demo` deploys it as
+  // the Worker `keepjson-demo`. vars, d1_databases and ratelimits are not inherited by a named environment, so they
+  // are repeated here: the demo has its own D1 database and its own rate limiter namespaces. triggers is inherited,
+  // but is repeated so the demo's whole setup reads in one place. See docs/self-hosting.md → Demo environment.
+  "env": {
+    "demo": {
+      // Replace database_id with the id printed by `wrangler d1 create keepjson-demo`.
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "keepjson-demo",
+          "database_id": "00000000-0000-0000-0000-000000000000",
+          "migrations_dir": "migrations"
+        }
+      ],
+      // Distinct from the top-level namespace_ids, so the demo and the main Instance don't share counters.
+      "ratelimits": [
+        { "name": "CREATE_LIMITER", "namespace_id": "2001", "simple": { "limit": 10, "period": 60 } },
+        { "name": "WRITE_LIMITER", "namespace_id": "2002", "simple": { "limit": 60, "period": 60 } }
+      ],
+      "triggers": { "crons": ["0 * * * *"] },
+      // Every Bin on the demo expires within 30 days, so the free-tier D1 database stays small (ADR 0003).
+      "vars": {
+        "MAX_BIN_BYTES": "102400",
+        "DEFAULT_TTL_SECONDS": "2592000",
+        "MAX_TTL_SECONDS": "2592000",
+        "CORS_ORIGINS": "*",
+        "RATE_LIMIT_ENABLED": "true"
+      }
+    }
   }
 }
