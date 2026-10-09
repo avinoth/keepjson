@@ -48,8 +48,8 @@ Do these in order. Each task is a thin end-to-end slice: test first, implement, 
 - [x] Tests: replace then read returns the new content; `X-Bin-Private`/`X-Bin-TTL` on PUT are ignored
 
 ## 6. Delete a Bin, `DELETE /bins/:id`
-- [ ] Needs the Write Key; `204`; a later GET → 404
-- [ ] Tests: auth cases; deleting twice → second call 404
+- [x] Needs the Write Key; `204`; a later GET → 404
+- [x] Tests: auth cases; deleting twice → second call 404
 
 ## 7. Expiry
 - [ ] `X-Bin-TTL` handling and the default/max rules exactly as in api.md → Expiry rules
