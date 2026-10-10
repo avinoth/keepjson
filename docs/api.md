@@ -19,6 +19,9 @@ This is what the MVP implements. Terms (Bin, Write Key, Read Key, Private Bin, E
 ### `GET /health`
 `200 {"status":"ok"}`. Needs no auth and doesn't touch D1.
 
+### `GET /openapi.json` and `GET /docs`
+`GET /openapi.json` returns `200` with this contract as an OpenAPI 3.1 spec: every route above and below, its request headers, bodies, responses and error codes, and a `bearerAuth` security scheme. `GET /docs` returns `200` with an HTML page (Swagger UI, loaded from a CDN at a pinned version) that renders it. Like `/health`, both need no auth, aren't rate limited and don't touch D1.
+
 ### `POST /bins`: create a Bin
 
 | Request header | Meaning |

@@ -1,9 +1,10 @@
-import { OpenAPIHono } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { sweepExpired } from "./bins/expiry";
 import { binRoutes } from "./bins/routes";
 import { type AppEnv, withConfig } from "./context";
 import { withCors } from "./cors";
 import { ApiError, errorResponse } from "./errors";
+import { BEARER_AUTH, docsPage, errorResponses, SPEC_INFO } from "./openapi";
 
 export const app = new OpenAPIHono<AppEnv>();
 
@@ -18,9 +19,39 @@ app.use(async (c, next) => {
 app.use(withConfig);
 app.use(withCors);
 
-app.get("/health", (c) => c.json({ status: "ok" }));
+const healthRoute = createRoute({
+  method: "get",
+  path: "/health",
+  tags: ["Instance"],
+  summary: "Check that the Instance is up",
+  description: "Needs no key and doesn't touch D1.",
+  responses: {
+    200: {
+      description: "The Instance is up.",
+      content: { "application/json": { schema: z.object({ status: z.literal("ok") }) } },
+    },
+    ...errorResponses("internal_error"),
+  },
+});
+
+app.openapi(healthRoute, (c) => c.json({ status: "ok" as const }, 200));
 
 app.route("/bins", binRoutes);
+
+app.openAPIRegistry.registerComponent("securitySchemes", BEARER_AUTH, {
+  type: "http",
+  scheme: "bearer",
+  description: "A Bin's Write Key (`kj_w_…`) or Read Key (`kj_r_…`), as `Authorization: Bearer <key>`.",
+});
+
+// The spec and its viewer describe every route registered above. Like /health, they need no key, aren't rate limited
+// and don't touch D1. The spec is built once, on first use, when every route is registered.
+let spec: ReturnType<typeof app.getOpenAPI31Document> | undefined;
+app.get("/openapi.json", (c) => {
+  spec ??= app.getOpenAPI31Document({ openapi: "3.1.0", info: SPEC_INFO });
+  return c.json(spec);
+});
+app.get("/docs", (c) => c.html(docsPage("/openapi.json")));
 
 app.notFound((c) => errorResponse(c, 404, "not_found", "Not found"));
 

@@ -68,9 +68,9 @@ Do these in order. Each task is a thin end-to-end slice: test first, implement, 
 - [x] Tests: preflight on `/bins` and `/bins/:id`; a disallowed origin gets no ACAO header; `X-Bin-*` headers are exposed
 
 ## 10. OpenAPI
-- [ ] Every route is defined with `createRoute` (request headers, bodies and all error responses described)
-- [ ] `GET /openapi.json` serves the spec; `GET /docs` serves a Swagger UI or Scalar page
-- [ ] Test: the spec is valid and lists every route in api.md
+- [x] Every route is defined with `createRoute` (request headers, bodies and all error responses described)
+- [x] `GET /openapi.json` serves the spec; `GET /docs` serves a Swagger UI or Scalar page
+- [x] Test: the spec is valid and lists every route in api.md
 
 ## 11. Self-hosting docs and demo
 - [ ] README: quick start with curl examples (create/read/replace/delete, private, TTL); a "Deploy to Cloudflare" button
