@@ -64,8 +64,8 @@ Do these in order. Each task is a thin end-to-end slice: test first, implement, 
 - [x] Tests: use a stub limiter binding to check both branches and the disabled flag
 
 ## 9. CORS
-- [ ] Hono `cors()` driven by `CORS_ORIGINS` (`*` or an allowlist); methods, allowed headers and exposed headers as in api.md
-- [ ] Tests: preflight on `/bins` and `/bins/:id`; a disallowed origin gets no ACAO header; `X-Bin-*` headers are exposed
+- [x] Hono `cors()` driven by `CORS_ORIGINS` (`*` or an allowlist); methods, allowed headers and exposed headers as in api.md
+- [x] Tests: preflight on `/bins` and `/bins/:id`; a disallowed origin gets no ACAO header; `X-Bin-*` headers are exposed
 
 ## 10. OpenAPI
 - [ ] Every route is defined with `createRoute` (request headers, bodies and all error responses described)

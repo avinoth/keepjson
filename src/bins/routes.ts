@@ -1,5 +1,5 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
-import { type AppEnv, withConfig } from "../context";
+import type { AppEnv } from "../context";
 import { ApiError } from "../errors";
 import { requireKey } from "./auth";
 import { parseBinBody } from "./body";
@@ -10,8 +10,6 @@ import { rateLimit } from "./rate-limit";
 import { type Bin, findLive, insert, remove, replaceContent } from "./repository";
 
 export const binRoutes = new OpenAPIHono<AppEnv>();
-
-binRoutes.use(withConfig);
 
 // Rate limiting comes first, before the id, auth and body checks (docs/api.md → Validation and errors): it protects
 // the Worker, so a limited client shouldn't get D1 lookups, key hashing or body parsing. Reads aren't limited.
