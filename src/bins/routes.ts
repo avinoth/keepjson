@@ -6,11 +6,17 @@ import { parseBinBody } from "./body";
 import { resolveExpiresAt } from "./expiry";
 import { generateBinId, generateReadKey, generateWriteKey, hashKey, isValidBinId } from "./keys";
 import { binMetadataHeaders, toIso } from "./metadata";
+import { rateLimit } from "./rate-limit";
 import { type Bin, findLive, insert, remove, replaceContent } from "./repository";
 
 export const binRoutes = new OpenAPIHono<AppEnv>();
 
 binRoutes.use(withConfig);
+
+// Rate limiting comes first, before the id, auth and body checks (docs/api.md → Validation and errors): it protects
+// the Worker, so a limited client shouldn't get D1 lookups, key hashing or body parsing. Reads aren't limited.
+binRoutes.post("/", rateLimit("CREATE_LIMITER"));
+binRoutes.on(["PUT", "DELETE"], "/:id", rateLimit("WRITE_LIMITER"));
 
 binRoutes.post("/", async (c) => {
   const now = Date.now();
