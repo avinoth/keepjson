@@ -1,5 +1,6 @@
 import { createRoute, z } from "@hono/zod-openapi";
 import { errorResponses, IsoTimestamp, OPTIONAL_BEARER_AUTH, REQUIRED_BEARER_AUTH } from "../openapi";
+import { rateLimit } from "./rate-limit";
 
 // The OpenAPI routes for Bins (docs/api.md → Routes). Request headers, the id and the body are described as plain
 // OpenAPI objects rather than Zod schemas, so zod-openapi adds no validators: the handlers check them in the order
@@ -80,6 +81,9 @@ const binBody = {
 
 export const createBinRoute = createRoute({
   method: "post",
+  // Rate limiting runs before the handler, so before the id, auth and body checks (docs/api.md → Validation and
+  // errors): a limited client gets no D1 lookup, key hashing or body parsing.
+  middleware: [rateLimit("CREATE_LIMITER")] as const,
   path: "/",
   tags: ["Bins"],
   summary: "Create a Bin",
@@ -149,6 +153,9 @@ export const readBinRoute = createRoute({
 
 export const replaceBinRoute = createRoute({
   method: "put",
+  // Rate limiting runs before the handler, so before the id, auth and body checks (docs/api.md → Validation and
+  // errors): a limited client gets no D1 lookup, key hashing or body parsing.
+  middleware: [rateLimit("WRITE_LIMITER")] as const,
   path: "/{id}",
   tags: ["Bins"],
   summary: "Replace a Bin's content",
@@ -181,6 +188,9 @@ export const replaceBinRoute = createRoute({
 
 export const deleteBinRoute = createRoute({
   method: "delete",
+  // Rate limiting runs before the handler, so before the id, auth and body checks (docs/api.md → Validation and
+  // errors): a limited client gets no D1 lookup, key hashing or body parsing.
+  middleware: [rateLimit("WRITE_LIMITER")] as const,
   path: "/{id}",
   tags: ["Bins"],
   summary: "Delete a Bin",
