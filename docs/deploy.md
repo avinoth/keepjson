@@ -1,4 +1,4 @@
-# Self-hosting keepjson
+# Deploy keepjson to your own Cloudflare account
 
 An Instance of keepjson is one Cloudflare Worker plus one D1 database in your own Cloudflare account. This guide sets one up from a clone, then covers configuration, local development, updates and the demo environment. The API itself is described in [`api.md`](./api.md).
 

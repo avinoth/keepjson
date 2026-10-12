@@ -1,11 +1,11 @@
 # keepjson
 
 Store JSON with one HTTP call. No signup, no account, no SDK.
-An open-source, self-hostable alternative to jsonbin.io, built on Hono, Cloudflare Workers and D1.
+An open-source alternative to jsonbin.io that you deploy to your own Cloudflare account, built on Hono, Cloudflare Workers and D1.
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/avinoth/keepjson)
 
-The button deploys the Worker to your Cloudflare account. After a one-click deploy you still need to run the D1 migrations, or every Bin request fails because the `bins` table doesn't exist yet: see [`docs/self-hosting.md`](./docs/self-hosting.md).
+The button deploys the Worker to your Cloudflare account. After a one-click deploy you still need to run the D1 migrations, or every Bin request fails because the `bins` table doesn't exist yet: see [`docs/deploy.md`](./docs/deploy.md).
 
 ## Quick start
 
@@ -183,15 +183,15 @@ The codes are `invalid_json`, `invalid_ttl` (400), `unauthorized` (401), `forbid
 - `GET /openapi.json` serves the OpenAPI 3.1 spec, for client generators and other tools.
 - [`docs/api.md`](./docs/api.md) is the full contract: validation order, Expiry rules, rate limiting and CORS.
 
-## Self-hosting
+## Deploy your own Instance
 
-keepjson is designed to be self-hosted: you deploy it to your own Cloudflare account with your own D1 database, and you set the limits (Bin size, Expiry, rate limits, CORS origins). [`docs/self-hosting.md`](./docs/self-hosting.md) walks through creating the D1 database, running the migrations, setting the vars, deploying and updating.
+keepjson runs in your own Cloudflare account: you deploy it there with your own D1 database, and you set the limits (Bin size, Expiry, rate limits, CORS origins). [`docs/deploy.md`](./docs/deploy.md) walks through creating the D1 database, running the migrations, setting the vars, deploying and updating.
 
 ## Docs
 
 - [`CONTEXT.md`](./CONTEXT.md): domain vocabulary
 - [`docs/api.md`](./docs/api.md): API contract
-- [`docs/self-hosting.md`](./docs/self-hosting.md): deploying and running your own Instance
+- [`docs/deploy.md`](./docs/deploy.md): deploying and running your own Instance
 - [`docs/adr/`](./docs/adr): architecture decisions
 - [`docs/TODO.md`](./docs/TODO.md): build plan
 - [`AGENTS.md`](./AGENTS.md): how coding agents (and humans) should work on this repo

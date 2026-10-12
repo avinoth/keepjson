@@ -72,8 +72,8 @@ Do these in order. Each task is a thin end-to-end slice: test first, implement, 
 - [x] `GET /openapi.json` serves the spec; `GET /docs` serves a Swagger UI or Scalar page
 - [x] Test: the spec is valid and lists every route in api.md
 
-## 11. Self-hosting docs and demo
+## 11. Deployment docs and demo
 - [x] README: quick start with curl examples (create/read/replace/delete, private, TTL); a "Deploy to Cloudflare" button
-- [x] `docs/self-hosting.md`: create the D1 database, run migrations, set vars, deploy, update
+- [x] `docs/deploy.md` (deploying to your own Cloudflare account): create the D1 database, run migrations, set vars, deploy, update
 - [x] The README warns about putting Write Keys in frontend code
 - [x] A `demo` environment in `wrangler.jsonc` with the demo Instance values from api.md

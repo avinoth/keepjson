@@ -147,7 +147,7 @@ The docs must warn that a Write Key embedded in frontend code gives every visito
 
 `MAX_BIN_BYTES` must not be set above 1,000,000 (the D1 row cap is about 2 MB, ADR 0003). The config is parsed on every request, and an invalid value, such as a `MAX_BIN_BYTES` above the ceiling, makes the Instance answer every request with `500 internal_error`.
 
-The Demo Instance values are the `demo` environment in `wrangler.jsonc`. How to set the vars, and what each one means for an Instance, is in [`self-hosting.md`](./self-hosting.md).
+The Demo Instance values are the `demo` environment in `wrangler.jsonc`. How to set the vars, and what each one means for an Instance, is in [`deploy.md`](./deploy.md).
 
 ## Storage (draft schema, `migrations/0001_bins.sql`)
 

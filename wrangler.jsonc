@@ -37,7 +37,7 @@
   // The demo Instance (docs/api.md → Instance configuration): `pnpm exec wrangler deploy --env demo` deploys it as
   // the Worker `keepjson-demo`. vars, d1_databases and ratelimits are not inherited by a named environment, so they
   // are repeated here: the demo has its own D1 database and its own rate limiter namespaces. triggers is inherited,
-  // but is repeated so the demo's whole setup reads in one place. See docs/self-hosting.md → Demo environment.
+  // but is repeated so the demo's whole setup reads in one place. See docs/deploy.md → Demo environment.
   "env": {
     "demo": {
       // Replace database_id with the id printed by `wrangler d1 create keepjson-demo`.
