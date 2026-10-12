@@ -1,48 +1,197 @@
 # keepjson
 
 Store JSON with one HTTP call. No signup, no account, no SDK.
-An open-source, self-hostable alternative to jsonbin.io, built on Hono, Cloudflare Workers and D1.
+An open-source alternative to jsonbin.io that you deploy to your own Cloudflare account, built on Hono, Cloudflare Workers and D1.
 
-> **Status: pre-alpha, outline only.** None of the code exists yet. The design is in [`docs/`](./docs) and the build plan is in [`docs/TODO.md`](./docs/TODO.md).
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/avinoth/keepjson)
 
-## Planned API
+The button deploys the Worker to your Cloudflare account. After a one-click deploy you still need to run the D1 migrations, or every Bin request fails because the `bins` table doesn't exist yet: see [`docs/deploy.md`](./docs/deploy.md).
+
+## Quick start
+
+Every example uses `BASE`, the URL of your Instance (`http://localhost:8787` under `pnpm dev`):
 
 ```sh
-# Create a Bin: the response gives you its id and a Write Key (shown only once)
-curl -X POST https://<your-instance>/bins \
-  -H 'Content-Type: application/json' \
-  -d '{"hello":"world"}'
-# → 201 {"id":"V1StGXR8_Z5jdHi6B-myT","writeKey":"kj_w_…","private":false,...}
-
-# Read it (public Bins need no key)
-curl https://<your-instance>/bins/V1StGXR8_Z5jdHi6B-myT
-
-# Replace it
-curl -X PUT https://<your-instance>/bins/V1StGXR8_Z5jdHi6B-myT \
-  -H 'Authorization: Bearer kj_w_…' -H 'Content-Type: application/json' \
-  -d '{"hello":"again"}'
-
-# Delete it
-curl -X DELETE https://<your-instance>/bins/V1StGXR8_Z5jdHi6B-myT \
-  -H 'Authorization: Bearer kj_w_…'
+BASE=https://keepjson.<your-subdomain>.workers.dev
 ```
 
-Options on create:
-- `X-Bin-Private: true` makes a Private Bin. You also get a read-only **Read Key** to share.
-- `X-Bin-TTL: 86400` makes the Bin expire after a day.
+### Create a Bin
 
-> ⚠️ Anyone who has a Write Key can overwrite or delete that Bin. Don't embed Write Keys in frontend code.
+The body must be a JSON object or array, sent with `Content-Type: application/json`.
 
-The full contract is in [`docs/api.md`](./docs/api.md).
+```sh
+curl -i -X POST "$BASE/bins" \
+  -H 'Content-Type: application/json' \
+  -d '{"hello":"world"}'
+```
 
-## Self-hosting
+```http
+HTTP/1.1 201 Created
+Location: /bins/LfPSR7g3LQUoBve1utAKk
+X-Bin-Id: LfPSR7g3LQUoBve1utAKk
+X-Bin-Private: false
+X-Bin-Created-At: 2026-10-09T12:00:00.000Z
+X-Bin-Updated-At: 2026-10-09T12:00:00.000Z
+Cache-Control: no-store
 
-keepjson is designed to be self-hosted first: you deploy it to your own Cloudflare account with your own D1 database, and you set the limits (size, expiry, rate limits). A one-click deploy button and a setup guide are coming (see TODO §11).
+{"id":"LfPSR7g3LQUoBve1utAKk","writeKey":"kj_w_3mQ…","private":false,"createdAt":"2026-10-09T12:00:00.000Z","expiresAt":null}
+```
+
+Save the `writeKey` now: it is shown only once, and the server keeps only its hash, so a lost Write Key can't be recovered. There is no endpoint that lists Bins, so keep the `id` too.
+
+```sh
+ID=LfPSR7g3LQUoBve1utAKk
+WRITE_KEY='kj_w_3mQ…'  # paste the whole writeKey from the response (keys are shortened with … in this README)
+```
+
+### Read it
+
+A public Bin needs no key. You get back exactly the JSON you stored, byte for byte, with the Bin's metadata in `X-Bin-*` headers.
+
+```sh
+curl -i "$BASE/bins/$ID"
+```
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+X-Bin-Id: LfPSR7g3LQUoBve1utAKk
+X-Bin-Private: false
+X-Bin-Created-At: 2026-10-09T12:00:00.000Z
+X-Bin-Updated-At: 2026-10-09T12:00:00.000Z
+Cache-Control: no-store
+
+{"hello":"world"}
+```
+
+### Replace it
+
+Replacing needs the Write Key. The whole content is replaced, and the last write wins.
+
+```sh
+curl -i -X PUT "$BASE/bins/$ID" \
+  -H "Authorization: Bearer $WRITE_KEY" \
+  -H 'Content-Type: application/json' \
+  -d '{"hello":"again"}'
+```
+
+```http
+HTTP/1.1 200 OK
+X-Bin-Id: LfPSR7g3LQUoBve1utAKk
+X-Bin-Private: false
+X-Bin-Created-At: 2026-10-09T12:00:00.000Z
+X-Bin-Updated-At: 2026-10-09T12:05:00.000Z
+
+{"id":"LfPSR7g3LQUoBve1utAKk","private":false,"createdAt":"2026-10-09T12:00:00.000Z","updatedAt":"2026-10-09T12:05:00.000Z","expiresAt":null}
+```
+
+### Delete it
+
+Deleting needs the Write Key too. The Bin is gone at once, and for good.
+
+```sh
+curl -i -X DELETE "$BASE/bins/$ID" -H "Authorization: Bearer $WRITE_KEY"
+```
+
+```http
+HTTP/1.1 204 No Content
+```
+
+A later `GET` returns `404`.
+
+### Private Bins
+
+Send `X-Bin-Private: true` on create to make a Private Bin. Its content can be read only with a key, and the response also gives you a **Read Key** (`kj_r_…`), which can read the Bin but not change it. Privacy is fixed when the Bin is created.
+
+```sh
+curl -i -X POST "$BASE/bins" \
+  -H 'Content-Type: application/json' \
+  -H 'X-Bin-Private: true' \
+  -d '{"score":42}'
+```
+
+```http
+HTTP/1.1 201 Created
+Location: /bins/T9r8GR7iHMLh3crwtm52w
+X-Bin-Id: T9r8GR7iHMLh3crwtm52w
+X-Bin-Private: true
+X-Bin-Created-At: 2026-10-09T12:00:00.000Z
+X-Bin-Updated-At: 2026-10-09T12:00:00.000Z
+
+{"id":"T9r8GR7iHMLh3crwtm52w","writeKey":"kj_w_b8L…","readKey":"kj_r_Zp2…","private":true,"createdAt":"2026-10-09T12:00:00.000Z","expiresAt":null}
+```
+
+Read it with the Read Key (the Write Key works too):
+
+```sh
+READ_KEY='kj_r_Zp2…'  # the whole readKey from the response
+curl "$BASE/bins/T9r8GR7iHMLh3crwtm52w" -H "Authorization: Bearer $READ_KEY"
+# → 200 {"score":42}
+```
+
+Without a key you get `401`; with a wrong key, or a Read Key on `PUT` or `DELETE`, you get `403`:
+
+```http
+HTTP/1.1 401 Unauthorized
+
+{"error":{"code":"unauthorized","message":"This Bin needs a key: send Authorization: Bearer <key>"}}
+```
+
+### Expiry
+
+Send `X-Bin-TTL: <seconds>` on create and the Bin expires that many seconds later. The Expiry comes back in `expiresAt` and in the `X-Bin-Expires-At` header. After it, the Bin answers `404` and is deleted by the hourly sweep.
+
+```sh
+curl -i -X POST "$BASE/bins" \
+  -H 'Content-Type: application/json' \
+  -H 'X-Bin-TTL: 86400' \
+  -d '[1,2,3]'
+```
+
+```http
+HTTP/1.1 201 Created
+Location: /bins/P159twtqmCe98Lc4dKigT
+X-Bin-Id: P159twtqmCe98Lc4dKigT
+X-Bin-Private: false
+X-Bin-Created-At: 2026-10-09T12:00:00.000Z
+X-Bin-Updated-At: 2026-10-09T12:00:00.000Z
+X-Bin-Expires-At: 2026-10-10T12:00:00.000Z
+
+{"id":"P159twtqmCe98Lc4dKigT","writeKey":"kj_w_t4R…","private":false,"createdAt":"2026-10-09T12:00:00.000Z","expiresAt":"2026-10-10T12:00:00.000Z"}
+```
+
+The TTL must be a positive integer of seconds, and not above the Instance's maximum. An Instance can also set a default TTL for Bins created without the header (the public demo keeps every Bin for at most 30 days). The Expiry can't be changed after creation.
+
+### Errors
+
+Every error has the same shape:
+
+```http
+HTTP/1.1 400 Bad Request
+
+{"error":{"code":"invalid_ttl","message":"X-Bin-TTL must be a positive integer of seconds"}}
+```
+
+The codes are `invalid_json`, `invalid_ttl` (400), `unauthorized` (401), `forbidden` (403), `not_found` (404), `payload_too_large` (413), `unsupported_media_type` (415), `invalid_top_level` (422), `rate_limited` (429, with `Retry-After`) and `internal_error` (500). Creating, replacing and deleting are rate limited per client IP; reading is not.
+
+> [!WARNING]
+> **Never put a Write Key in frontend code.** Anything shipped to a browser (JavaScript, HTML, a mobile app bundle) can be read by everyone who loads it. Anyone who can see the page can copy the Write Key and overwrite or delete the Bin. For a read-only frontend, use a public Bin (no key at all) or a Private Bin's Read Key, which can only read. Keep the Write Key on a server or in a script only you run.
+
+## API reference
+
+- `GET /docs` on any Instance serves an interactive API reference (Swagger UI).
+- `GET /openapi.json` serves the OpenAPI 3.1 spec, for client generators and other tools.
+- [`docs/api.md`](./docs/api.md) is the full contract: validation order, Expiry rules, rate limiting and CORS.
+
+## Deploy your own Instance
+
+keepjson runs in your own Cloudflare account: you deploy it there with your own D1 database, and you set the limits (Bin size, Expiry, rate limits, CORS origins). [`docs/deploy.md`](./docs/deploy.md) walks through creating the D1 database, running the migrations, setting the vars, deploying and updating.
 
 ## Docs
 
 - [`CONTEXT.md`](./CONTEXT.md): domain vocabulary
 - [`docs/api.md`](./docs/api.md): API contract
+- [`docs/deploy.md`](./docs/deploy.md): deploying and running your own Instance
 - [`docs/adr/`](./docs/adr): architecture decisions
 - [`docs/TODO.md`](./docs/TODO.md): build plan
 - [`AGENTS.md`](./AGENTS.md): how coding agents (and humans) should work on this repo

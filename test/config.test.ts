@@ -1,5 +1,8 @@
+import { createExecutionContext, waitOnExecutionContext } from "cloudflare:test";
+import { env } from "cloudflare:workers";
 import { describe, expect, it } from "vitest";
 import { parseConfig } from "../src/config";
+import { app } from "../src/index";
 
 describe("parseConfig", () => {
   it("applies defaults when vars are unset or empty", () => {
@@ -46,5 +49,15 @@ describe("parseConfig", () => {
     ["RATE_LIMIT_ENABLED", "yes"],
   ])("rejects %s=%s", (name, value) => {
     expect(() => parseConfig({ [name]: value })).toThrow();
+  });
+});
+
+describe("an Instance with an invalid var", () => {
+  it("answers every request with 500 internal_error", async () => {
+    const ctx = createExecutionContext();
+    const res = await app.fetch(new Request("https://keepjson.test/health"), { ...env, MAX_BIN_BYTES: "2000000" }, ctx);
+    await waitOnExecutionContext(ctx);
+    expect(res.status).toBe(500);
+    expect(await res.json()).toEqual({ error: { code: "internal_error", message: "Internal error" } });
   });
 });

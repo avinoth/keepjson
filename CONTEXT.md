@@ -1,6 +1,6 @@
 # keepjson
 
-keepjson stores JSON documents for people who don't want to create an account: one REST call to save, one to fetch. It is an open-source, self-hostable alternative to jsonbin.io.
+keepjson stores JSON documents for people who don't want to create an account: one REST call to save, one to fetch. It is an open-source alternative to jsonbin.io that you deploy to your own Cloudflare account.
 
 ## Language
 
@@ -26,4 +26,4 @@ The secret issued with a Private Bin that grants read-only access to it.
 ### Operation
 
 **Instance**:
-One self-hosted deployment of keepjson, with its own limits and its own Bins.
+One deployment of keepjson in someone's own Cloudflare account, with its own limits and its own Bins.
