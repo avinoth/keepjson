@@ -22,7 +22,7 @@ export function bearerKey(authorization: string | undefined | null): string | nu
 /**
  * Throws unless the request may have `access` to `bin`: `401 unauthorized` when a key is needed and none was sent,
  * `403 forbidden` when the key sent doesn't grant it. Call it after the Bin was found, so an unknown id is a 404
- * before auth is considered (docs/api.md → Validation and errors). Keys are compared in constant time and are never
+ * before auth is considered. Keys are compared in constant time and are never
  * logged or put in an error message.
  */
 export async function requireKey(c: Context, bin: Bin, access: Access): Promise<void> {

@@ -1,5 +1,3 @@
-// All SQL for Bins lives in this module (ADR 0003). Times are unix ms.
-
 export type Bin = {
   id: string;
   /** Raw JSON exactly as received. */

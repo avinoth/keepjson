@@ -2,7 +2,7 @@ import type { Config } from "../config";
 import { ApiError } from "../errors";
 
 /**
- * Validates a create/replace request body in the order of docs/api.md: content type (415), size (413),
+ * Validates a create/replace request body in order: content type (415), size (413),
  * JSON (400), top-level type (422). Returns the body text exactly as received.
  */
 export async function parseBinBody(request: Request, config: Config): Promise<string> {

@@ -6,7 +6,7 @@ import { app } from "../src/index";
 const BASE_URL = "https://keepjson.test";
 const ORIGIN = "https://a.example";
 
-/** Every error code in docs/api.md → Validation and errors, with its status. */
+/** Every error code with its status. */
 const ERROR_STATUSES: Record<string, number> = {
   invalid_json: 400,
   invalid_ttl: 400,
@@ -20,7 +20,7 @@ const ERROR_STATUSES: Record<string, number> = {
   internal_error: 500,
 };
 
-/** The routes of docs/api.md → Routes, with the status codes each one can answer. */
+/** The routes of the API, with the status codes each one can answer. */
 const OPERATIONS: { path: string; method: string; statuses: number[]; errorCodes: string[] }[] = [
   { path: "/health", method: "get", statuses: [200, 500], errorCodes: ["internal_error"] },
   {
@@ -191,7 +191,7 @@ describe("GET /openapi.json", () => {
     expect(spec.info.description).toMatch(/Bin/);
   });
 
-  it("lists exactly the routes in docs/api.md", () => {
+  it("lists exactly the routes in the spec", () => {
     expect(Object.keys(spec.paths).sort()).toEqual(["/bins", "/bins/{id}", "/health"]);
     expect(Object.keys(spec.paths["/health"] ?? {})).toEqual(["get"]);
     expect(Object.keys(spec.paths["/bins"] ?? {})).toEqual(["post"]);
@@ -220,7 +220,7 @@ describe("GET /openapi.json", () => {
     expect(shown.sort()).toEqual([...errorCodes].sort());
   });
 
-  it("has one shared error schema whose code enum is every code in docs/api.md", () => {
+  it("has one shared error schema whose code enum is every code in the spec", () => {
     const error = spec.components.schemas.Error as {
       required?: string[];
       properties: { error: { required?: string[]; properties: { code: { enum: string[] }; message: Json } } };

@@ -2,9 +2,9 @@ import { z } from "@hono/zod-openapi";
 import { RATE_LIMIT_PERIOD_SECONDS } from "./bins/rate-limit";
 import { ERROR_CODES, type ErrorCode } from "./errors";
 
-// The OpenAPI description of the contract in docs/api.md. Schemas here only describe requests and responses: request
+// The OpenAPI description of the API. Schemas here only describe requests and responses: request
 // headers, path parameters and bodies are never given to zod-openapi as Zod schemas, so it validates nothing itself
-// and the handlers keep their own checks, order and error codes (docs/api.md → Validation and errors).
+// and the handlers keep their own checks, order and error codes.
 
 /** The name of the `Authorization: Bearer <key>` security scheme. */
 export const BEARER_AUTH = "bearerAuth";
@@ -21,7 +21,7 @@ export const OPTIONAL_BEARER_AUTH: SecurityRequirements = [{}, { [BEARER_AUTH]: 
 /** The `info` of the spec served at `/openapi.json`. */
 export const SPEC_INFO = {
   title: "keepjson",
-  // The version of the contract in docs/api.md.
+  // The version of the API.
   version: "0.1.0",
   description: [
     "Store JSON without an account: one call saves a Bin, one call fetches it.",
@@ -39,7 +39,7 @@ export const SPEC_INFO = {
 /** An ISO 8601 UTC timestamp, as in headers and JSON bodies. */
 export const IsoTimestamp = z.iso.datetime().openapi({ example: "2026-10-09T12:00:00.000Z" });
 
-/** The error response body of docs/api.md → Conventions, shared by every error. */
+/** The error response body, shared by every error. */
 export const ErrorSchema = z
   .object({
     error: z.object({
@@ -51,7 +51,7 @@ export const ErrorSchema = z
 
 type ErrorBody = z.infer<typeof ErrorSchema>;
 
-/** Each error code's status, when it is sent (docs/api.md → Validation and errors) and an example message. */
+/** Each error code's status, when it is sent and an example message. */
 const ERRORS = {
   invalid_json: { status: 400, when: "The body isn't valid JSON.", message: "Body is not valid JSON" },
   invalid_ttl: {

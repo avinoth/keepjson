@@ -5,7 +5,7 @@ export function toIso(ms: number): string {
   return new Date(ms).toISOString();
 }
 
-/** The `X-Bin-*` response headers of docs/api.md → Metadata response headers. */
+/** The `X-Bin-*` response headers on every Bin response. */
 export function binMetadataHeaders(bin: Bin): Record<string, string> {
   const headers: Record<string, string> = {
     "X-Bin-Id": bin.id,

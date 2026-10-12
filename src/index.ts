@@ -8,7 +8,7 @@ import { BEARER_AUTH, docsPage, errorResponses, SPEC_INFO } from "./openapi";
 
 export const app = new OpenAPIHono<AppEnv>();
 
-// Last write wins, so a cached response could be stale (docs/api.md → Conventions).
+// Last write wins, so a cached response could be stale.
 app.use(async (c, next) => {
   await next();
   c.header("Cache-Control", "no-store");
@@ -64,7 +64,7 @@ app.onError((err, c) => {
 
 export default {
   fetch: app.fetch,
-  // The hourly Cron Trigger: deletes expired Bins (docs/api.md → Expiry rules). Requests already treat them as gone.
+  // The hourly Cron Trigger: deletes expired Bins. Requests already treat them as gone.
   async scheduled(_controller, env, _ctx) {
     const deleted = await sweepExpired(env.DB, Date.now());
     console.log(`Expiry sweep deleted ${deleted} Bins`);

@@ -2,11 +2,11 @@ import type { Context } from "hono";
 import { cors } from "hono/cors";
 import type { AppEnv } from "./context";
 
-/** The request headers a browser may send (docs/api.md → CORS). */
+/** The request headers a browser may send. */
 export const CORS_ALLOWED_HEADERS = ["Authorization", "Content-Type", "X-Bin-Private", "X-Bin-TTL"];
 
 /**
- * The response headers a browser may read (docs/api.md → CORS): the `X-Bin-*` metadata, `Location` on create, and
+ * The response headers a browser may read: the `X-Bin-*` metadata, `Location` on create, and
  * `Retry-After` on `429`, none of which are CORS-safelisted.
  */
 export const CORS_EXPOSED_HEADERS = [
@@ -20,7 +20,7 @@ export const CORS_EXPOSED_HEADERS = [
 ];
 
 /**
- * CORS for every route, driven by `CORS_ORIGINS` (docs/api.md → CORS). Needs `withConfig` first. `*` allows any
+ * CORS for every route, driven by `CORS_ORIGINS`. Needs `withConfig` first. `*` allows any
  * origin; an allowlist echoes the request's `Origin` only on an exact match and otherwise sends no
  * `Access-Control-Allow-Origin`. Preflights are answered here with `204`, before rate limiting and D1. No
  * credentials: keys travel in the `Authorization` header, not in cookies.

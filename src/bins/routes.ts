@@ -14,7 +14,7 @@ export const binRoutes = new OpenAPIHono<AppEnv>();
 
 binRoutes.openapi(createBinRoute, async (c) => {
   const now = Date.now();
-  // X-Bin-TTL is checked before the body (docs/api.md → Validation and errors): it is a header, so a bad one is
+  // X-Bin-TTL is checked before the body: it is a header, so a bad one is
   // rejected without reading the body, and parseBinBody stays the same for PUT, which ignores X-Bin-TTL.
   const expiresAt = resolveExpiresAt(c.req.header("X-Bin-TTL"), c.var.config, now);
   const content = await parseBinBody(c.req.raw, c.var.config);
@@ -63,7 +63,7 @@ binRoutes.openapi(readBinRoute, async (c) => {
 
 binRoutes.openapi(replaceBinRoute, async (c) => {
   const bin = await findLiveBin(c.env.DB, c.req.param("id"), Date.now());
-  // Auth comes before the body is read (docs/api.md → Validation and errors).
+  // Auth comes before the body is read.
   await requireKey(c, bin, "write");
   const content = await parseBinBody(c.req.raw, c.var.config);
 

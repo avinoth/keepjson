@@ -181,7 +181,6 @@ The codes are `invalid_json`, `invalid_ttl` (400), `unauthorized` (401), `forbid
 
 - `GET /docs` on any Instance serves an interactive API reference (Swagger UI).
 - `GET /openapi.json` serves the OpenAPI 3.1 spec, for client generators and other tools.
-- [`docs/api.md`](./docs/api.md) is the full contract: validation order, Expiry rules, rate limiting and CORS.
 
 ## Deploy your own Instance
 
@@ -190,10 +189,7 @@ keepjson runs in your own Cloudflare account: you deploy it there with your own 
 ## Docs
 
 - [`CONTEXT.md`](./CONTEXT.md): domain vocabulary
-- [`docs/api.md`](./docs/api.md): API contract
 - [`docs/deploy.md`](./docs/deploy.md): deploying and running your own Instance
-- [`docs/adr/`](./docs/adr): architecture decisions
-- [`docs/TODO.md`](./docs/TODO.md): build plan
 - [`AGENTS.md`](./AGENTS.md): how coding agents (and humans) should work on this repo
 
 ## License

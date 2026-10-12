@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-// D1 caps a row at about 2 MB (ADR 0003), so an Instance may not raise the limit past this.
 export const MAX_BIN_BYTES_CEILING = 1_000_000;
 
 const nonNegativeInt = z.coerce.number().int().nonnegative();

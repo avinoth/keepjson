@@ -25,7 +25,7 @@
   // Hourly sweep of expired Bins.
   "triggers": { "crons": ["0 * * * *"] },
 
-  // Instance configuration: see docs/api.md → Instance configuration.
+  // Instance configuration: see docs/deploy.md → Set the vars.
   "vars": {
     "MAX_BIN_BYTES": "102400",
     "DEFAULT_TTL_SECONDS": "0",
@@ -34,7 +34,7 @@
     "RATE_LIMIT_ENABLED": "true"
   },
 
-  // The demo Instance (docs/api.md → Instance configuration): `pnpm exec wrangler deploy --env demo` deploys it as
+  // The demo Instance: `pnpm exec wrangler deploy --env demo` deploys it as
   // the Worker `keepjson-demo`. vars, d1_databases and ratelimits are not inherited by a named environment, so they
   // are repeated here: the demo has its own D1 database and its own rate limiter namespaces. triggers is inherited,
   // but is repeated so the demo's whole setup reads in one place. See docs/deploy.md → Demo environment.
@@ -55,7 +55,6 @@
         { "name": "WRITE_LIMITER", "namespace_id": "2002", "simple": { "limit": 60, "period": 60 } }
       ],
       "triggers": { "crons": ["0 * * * *"] },
-      // Every Bin on the demo expires within 30 days, so the free-tier D1 database stays small (ADR 0003).
       "vars": {
         "MAX_BIN_BYTES": "102400",
         "DEFAULT_TTL_SECONDS": "2592000",

@@ -6,8 +6,8 @@ import { deleteExpired } from "./repository";
 const MAX_DATE_MS = 8_640_000_000_000_000;
 
 /**
- * The Expiry (unix ms) of a Bin created at `now`, or null when it never expires, following docs/api.md → Expiry
- * rules. `header` is the `X-Bin-TTL` request header, or null/undefined when it wasn't sent.
+ * The Expiry (unix ms) of a Bin created at `now`, or null when it never expires, following the Expiry rules.
+ * `header` is the `X-Bin-TTL` request header, or null/undefined when it wasn't sent.
  *
  * - Header sent: it must be a positive integer of seconds (ASCII digits only, surrounding whitespace ignored) and
  *   not above the Instance's maximum, else `400 invalid_ttl`. An empty value was still sent, so it is invalid too.

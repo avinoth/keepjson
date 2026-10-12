@@ -1,6 +1,6 @@
 # Deploy keepjson to your own Cloudflare account
 
-An Instance of keepjson is one Cloudflare Worker plus one D1 database in your own Cloudflare account. This guide sets one up from a clone, then covers configuration, local development, updates and the demo environment. The API itself is described in [`api.md`](./api.md).
+An Instance of keepjson is one Cloudflare Worker plus one D1 database in your own Cloudflare account. This guide sets one up from a clone, then covers configuration, local development, updates and the demo environment.
 
 ## Prerequisites
 
@@ -69,9 +69,9 @@ An Instance is configured through the `vars` in `wrangler.jsonc`. Every value is
 | `CORS_ORIGINS` | `*` | The browser origins allowed to call the Instance: `*`, or a comma-separated allowlist. |
 | `RATE_LIMIT_ENABLED` | `true` | `false` turns off rate limiting for `POST`, `PUT` and `DELETE`. Only `true` or `false`. |
 
-**Why `MAX_BIN_BYTES` stops at 1,000,000.** Each Bin's content is stored inline in its D1 row, and D1 caps a row at about 2 MB ([ADR 0003](./adr/0003-cloudflare-d1-inline-content.md)). The ceiling leaves headroom for the rest of the row. Bins larger than that need a different storage layer, which would be a new ADR.
+**Why `MAX_BIN_BYTES` stops at 1,000,000.** Each Bin's content is stored inline in its D1 row, and D1 caps a row at about 2 MB. The ceiling leaves headroom for the rest of the row. Bins larger than that need a different storage layer.
 
-**Expiry.** `DEFAULT_TTL_SECONDS` and `MAX_TTL_SECONDS` work together ([api.md → Expiry rules](./api.md#expiry-rules)):
+**Expiry.** `DEFAULT_TTL_SECONDS` and `MAX_TTL_SECONDS` work together:
 
 - With `X-Bin-TTL` on create, the Bin expires that many seconds later. A TTL above `MAX_TTL_SECONDS` (when it isn't `0`) is rejected with `400 invalid_ttl`.
 - Without the header, the Bin gets `DEFAULT_TTL_SECONDS`; if that is `0`, it gets `MAX_TTL_SECONDS`; if that is `0` too, it never expires.
@@ -171,7 +171,7 @@ If you deployed with the button, your copy of the repo deploys itself on every p
 
 ## Demo environment
 
-`wrangler.jsonc` also defines an environment named `demo`, with the demo Instance values from [api.md → Instance configuration](./api.md#instance-configuration-vars): every Bin expires within 30 days (`DEFAULT_TTL_SECONDS` and `MAX_TTL_SECONDS` are `2592000`), so a free-tier D1 database stays small. It deploys as a separate Worker, `keepjson-demo`.
+`wrangler.jsonc` also defines an environment named `demo`, with the demo Instance values from the table in step 4: every Bin expires within 30 days (`DEFAULT_TTL_SECONDS` and `MAX_TTL_SECONDS` are `2592000`), so a free-tier D1 database stays small. It deploys as a separate Worker, `keepjson-demo`.
 
 Wrangler doesn't let a named environment inherit `vars`, `d1_databases` or `ratelimits` from the top level, so `env.demo` repeats them: it has its own D1 database (`keepjson-demo`) and its own rate limiter `namespace_id`s (`2001`, `2002`). To deploy it:
 

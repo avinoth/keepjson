@@ -4,7 +4,7 @@ keepjson is a Hono app on Cloudflare Workers + D1 that stores JSON Bins without 
 
 ## Before you change anything
 
-1. Read `CONTEXT.md` (vocabulary), `docs/api.md` (the contract) and `docs/adr/` (decisions you must not undo).
+1. Read `CONTEXT.md` (vocabulary).
 2. Take the **first unticked task** in `docs/TODO.md`. Don't skip ahead or merge tasks.
 
 ## How to work
@@ -19,8 +19,6 @@ keepjson is a Hono app on Cloudflare Workers + D1 that stores JSON Bins without 
 
 Use the terms in `CONTEXT.md` exactly, in code, tests, docs and commit messages: `Bin`, `writeKey`, `readKey`, `expiresAt`, `Instance`. Don't use the words listed under _Avoid_ (no `document`, `record`, `masterKey`, `apiKey`, `token`).
 
-## When the plan is wrong
+## On new commits
 
-- If the contract needs to change, update `docs/api.md` in the same commit and say why in the commit message.
-- If you would contradict an ADR, stop. Propose a new ADR rather than editing the old one.
 - If a new domain term appears, add it to `CONTEXT.md` (glossary only, no implementation details).

@@ -1,7 +1,7 @@
 import type { Context } from "hono";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 
-/** The error codes in docs/api.md → Validation and errors. */
+/** The error codes an error response can carry. */
 export const ERROR_CODES = [
   "invalid_json",
   "invalid_ttl",
@@ -17,7 +17,7 @@ export const ERROR_CODES = [
 
 export type ErrorCode = (typeof ERROR_CODES)[number];
 
-/** Thrown anywhere in a request; `app.onError` turns it into the error response of docs/api.md. */
+/** Thrown anywhere in a request; `app.onError` turns it into the error response. */
 export class ApiError extends Error {
   constructor(
     readonly status: ContentfulStatusCode,

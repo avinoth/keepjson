@@ -19,7 +19,7 @@ export type LimiterBinding = "CREATE_LIMITER" | "WRITE_LIMITER";
 
 /**
  * Checks `binding` for the client's IP and answers `429 rate_limited` with `Retry-After` when it is over the limit
- * (docs/api.md → Rate limiting). Needs `withConfig` first. With `RATE_LIMIT_ENABLED=false` the limiter isn't called.
+ *. Needs `withConfig` first. With `RATE_LIMIT_ENABLED=false` the limiter isn't called.
  */
 export function rateLimit(binding: LimiterBinding) {
   return createMiddleware<AppEnv>(async (c, next) => {
