@@ -2,6 +2,8 @@
 
 Store JSON with one HTTP call. No signup, no account, no SDK.
 
+Demo Instance 👉 [https://keepjson.fourlegs.workers.dev](https://keepjson.fourlegs.workers.dev)
+
 An open-source alternative to [jsonbin.io](https://jsonbin.io) that you deploy to your own Cloudflare account, built on Hono, Cloudflare Workers and D1.
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/avinoth/keepjson)
