@@ -1,0 +1,36 @@
+{
+  // The demo Instance, deployed as its own Worker with `pnpm exec wrangler deploy -c wrangler.demo.jsonc`.
+  // Same code as wrangler.jsonc, but its own D1 database, its own rate limiter namespaces and vars that expire
+  // every Bin within 30 days. See docs/deploy.md → Demo Instance.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "keepjson-demo",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-01",
+  "observability": { "enabled": true },
+
+  // Replace database_id with the id printed by `wrangler d1 create keepjson-demo`.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "keepjson-demo",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ],
+
+  // Distinct from the namespace_ids in wrangler.jsonc, so the demo and the main Instance don't share counters.
+  "ratelimits": [
+    { "name": "CREATE_LIMITER", "namespace_id": "2001", "simple": { "limit": 10, "period": 60 } },
+    { "name": "WRITE_LIMITER", "namespace_id": "2002", "simple": { "limit": 60, "period": 60 } }
+  ],
+
+  "triggers": { "crons": ["0 * * * *"] },
+
+  "vars": {
+    "MAX_BIN_BYTES": "102400",
+    "DEFAULT_TTL_SECONDS": "2592000",
+    "MAX_TTL_SECONDS": "2592000",
+    "CORS_ORIGINS": "*",
+    "RATE_LIMIT_ENABLED": "true"
+  }
+}

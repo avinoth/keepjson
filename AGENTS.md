@@ -4,7 +4,7 @@ keepjson is a Hono app on Cloudflare Workers + D1 that stores JSON Bins without 
 
 ## Which job is this?
 
-- **Deploying or running an Instance** (setup, D1, migrations, vars, `wrangler deploy`, the demo environment): follow `docs/deploy.md` step by step and skip the sections below. Don't change code or commit.
+- **Deploying or running an Instance** (setup, D1, migrations, vars, `wrangler deploy`, the demo Instance): follow `docs/deploy.md` step by step and skip the sections below. Don't change code or commit.
   - Ask the user to run `pnpm exec wrangler login` themselves (suggest `! pnpm exec wrangler login`); it is interactive and needs their Cloudflare account.
   - Before `wrangler d1 create`, `migrations apply --remote` or `deploy`, tell the user what it will change in their account and wait for a go-ahead.
   - Put the printed `database_id` into `wrangler.jsonc` as the guide says. Don't invent values for vars the user hasn't chosen: ask, or keep the defaults.

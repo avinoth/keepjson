@@ -6,11 +6,7 @@ An Instance of keepjson is one Cloudflare Worker plus one D1 database in your ow
 
 - A Cloudflare account. The Worker, D1, Cron Triggers and the Workers Rate Limiting bindings all run on it.
 - Node.js 22 and pnpm.
-- Wrangler, Cloudflare's CLI, is a dev dependency, so you run it as `pnpm exec wrangler` and don't need a global install. Log in once:
-
-  ```sh
-  pnpm exec wrangler login
-  ```
+- Wrangler, Cloudflare's CLI, is a dev dependency, so you run it as `pnpm exec wrangler` and don't need a global install.
 
 ## 1. Clone and install
 
@@ -20,13 +16,14 @@ cd keepjson
 pnpm install
 ```
 
-## 2. Create the D1 database
+## 2. Login to Cloudflare & Create the D1 database
 
 ```sh
+pnpm exec wrangler login
 pnpm exec wrangler d1 create keepjson
 ```
 
-The command prints the new database's `database_id`. Put it into `wrangler.jsonc`, replacing the all-zero placeholder in the top-level `d1_databases` entry:
+The command prints the new database's `database_id`. Put it into `wrangler.jsonc`, replacing the all-zero placeholder in the `d1_databases` entry:
 
 ```jsonc
 "d1_databases": [
@@ -117,7 +114,7 @@ Expired Bins answer `404` as soon as their Expiry passes. Their rows are deleted
 pnpm run deploy
 ```
 
-Use `pnpm run deploy`, not `pnpm deploy`: `pnpm deploy` is a built-in pnpm command and doesn't run the script. The script runs `wrangler deploy`, which uploads the Worker as `keepjson` and prints its URL (`https://keepjson.<your-subdomain>.workers.dev`). Wrangler warns that several environments are defined and none was chosen; that is expected, and it deploys the top-level configuration. To use your own domain, add a route or custom domain in the Cloudflare dashboard or in `wrangler.jsonc`.
+Use `pnpm run deploy`, not `pnpm deploy`: `pnpm deploy` is a built-in pnpm command and doesn't run the script. The script runs `wrangler deploy`, which uploads the Worker as `keepjson` and prints its URL (`https://keepjson.<your-subdomain>.workers.dev`). To use your own domain, add a route or custom domain in the Cloudflare dashboard or in `wrangler.jsonc`.
 
 Check the Instance:
 
@@ -148,7 +145,7 @@ pnpm db:migrate:local   # creates the bins table in the local D1 database, under
 pnpm dev                # serves the Instance on http://localhost:8787
 ```
 
-`pnpm dev` uses the top-level configuration with a local D1 database and simulated rate limiters; it doesn't touch your Cloudflare account. To override vars locally without editing `wrangler.jsonc`, put them in a `.dev.vars` file (it is gitignored):
+`pnpm dev` uses `wrangler.jsonc` with a local D1 database and simulated rate limiters; it doesn't touch your Cloudflare account. To override vars locally without editing `wrangler.jsonc`, put them in a `.dev.vars` file (it is gitignored):
 
 ```sh
 RATE_LIMIT_ENABLED=false
@@ -169,17 +166,17 @@ Apply the migrations before deploying, so the new code never runs against an old
 
 If you deployed with the button, your copy of the repo deploys itself on every push. Pull the upstream changes into it, apply any new migrations with the command above, then push.
 
-## Demo environment
+## Demo Instance
 
-`wrangler.jsonc` also defines an environment named `demo`, with the demo Instance values from the table in step 4: every Bin expires within 30 days (`DEFAULT_TTL_SECONDS` and `MAX_TTL_SECONDS` are `2592000`), so a free-tier D1 database stays small. It deploys as a separate Worker, `keepjson-demo`.
+`wrangler.demo.jsonc` is a second, standalone Wrangler config for a demo Instance, with the demo values from the table in step 4: every Bin expires within 30 days (`DEFAULT_TTL_SECONDS` and `MAX_TTL_SECONDS` are `2592000`), so a free-tier D1 database stays small. It deploys the same code as a separate Worker, `keepjson-demo`, with its own D1 database (`keepjson-demo`) and its own rate limiter `namespace_id`s (`2001`, `2002`).
 
-Wrangler doesn't let a named environment inherit `vars`, `d1_databases` or `ratelimits` from the top level, so `env.demo` repeats them: it has its own D1 database (`keepjson-demo`) and its own rate limiter `namespace_id`s (`2001`, `2002`). To deploy it:
+Wrangler reads `wrangler.jsonc` by default, so the demo only happens when you pass `-c wrangler.demo.jsonc` (`--config`). To deploy it:
 
 ```sh
 pnpm exec wrangler d1 create keepjson-demo
-# put the printed database_id into env.demo.d1_databases in wrangler.jsonc
-pnpm exec wrangler d1 migrations apply keepjson-demo --remote --env demo
-pnpm exec wrangler deploy --env demo
+# put the printed database_id into wrangler.demo.jsonc
+pnpm exec wrangler d1 migrations apply keepjson-demo --remote -c wrangler.demo.jsonc
+pnpm exec wrangler deploy -c wrangler.demo.jsonc
 ```
 
-Every Wrangler command for the demo needs `--env demo`; without it, the command acts on the top-level Instance.
+Every Wrangler command for the demo needs `-c wrangler.demo.jsonc`; without it, the command acts on the main Instance.
