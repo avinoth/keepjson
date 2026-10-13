@@ -5,7 +5,7 @@ An Instance of keepjson is one Cloudflare Worker plus one D1 database in your ow
 ## Prerequisites
 
 - A Cloudflare account. The Worker, D1, Cron Triggers and the Workers Rate Limiting bindings all run on it.
-- Node.js 22 and pnpm (the version is pinned in `package.json` → `packageManager`; `corepack enable` picks it up).
+- Node.js 22 and pnpm.
 - Wrangler, Cloudflare's CLI, is a dev dependency, so you run it as `pnpm exec wrangler` and don't need a global install. Log in once:
 
   ```sh

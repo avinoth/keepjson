@@ -1,11 +1,12 @@
 # keepjson
 
 Store JSON with one HTTP call. No signup, no account, no SDK.
-An open-source alternative to jsonbin.io that you deploy to your own Cloudflare account, built on Hono, Cloudflare Workers and D1.
+
+An open-source alternative to [jsonbin.io](https://jsonbin.io) that you deploy to your own Cloudflare account, built on Hono, Cloudflare Workers and D1.
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/avinoth/keepjson)
 
-The button deploys the Worker to your Cloudflare account. After a one-click deploy you still need to run the D1 migrations, or every Bin request fails because the `bins` table doesn't exist yet: see [`docs/deploy.md`](./docs/deploy.md).
+The button deploys the Worker to your Cloudflare account. After a one-click deploy you still need to run the D1 migrations, or every Bin request fails because the `bins` table doesn't exist yet: see [`Deployment Instructions`](./docs/deploy.md).
 
 ## Quick start
 
@@ -37,7 +38,7 @@ Cache-Control: no-store
 {"id":"LfPSR7g3LQUoBve1utAKk","writeKey":"kj_w_3mQ…","private":false,"createdAt":"2026-10-09T12:00:00.000Z","expiresAt":null}
 ```
 
-Save the `writeKey` now: it is shown only once, and the server keeps only its hash, so a lost Write Key can't be recovered. There is no endpoint that lists Bins, so keep the `id` too.
+Save the `writeKey` now: it is shown only once, and the server keeps only its hash, so a lost Write Key can't be recovered. Save the `id` as well to access the bin later.
 
 ```sh
 ID=LfPSR7g3LQUoBve1utAKk
@@ -97,11 +98,9 @@ curl -i -X DELETE "$BASE/bins/$ID" -H "Authorization: Bearer $WRITE_KEY"
 HTTP/1.1 204 No Content
 ```
 
-A later `GET` returns `404`.
-
 ### Private Bins
 
-Send `X-Bin-Private: true` on create to make a Private Bin. Its content can be read only with a key, and the response also gives you a **Read Key** (`kj_r_…`), which can read the Bin but not change it. Privacy is fixed when the Bin is created.
+Send `X-Bin-Private: true` on create to make a Private Bin. Its content can be read only with a key, and the response also gives you a **Read Key** (`kj_r_…`), which can read the Bin but not change it.
 
 ```sh
 curl -i -X POST "$BASE/bins" \
@@ -121,7 +120,7 @@ X-Bin-Updated-At: 2026-10-09T12:00:00.000Z
 {"id":"T9r8GR7iHMLh3crwtm52w","writeKey":"kj_w_b8L…","readKey":"kj_r_Zp2…","private":true,"createdAt":"2026-10-09T12:00:00.000Z","expiresAt":null}
 ```
 
-Read it with the Read Key (the Write Key works too):
+You can read it with either the Read Key or the Write Key:
 
 ```sh
 READ_KEY='kj_r_Zp2…'  # the whole readKey from the response
@@ -139,7 +138,7 @@ HTTP/1.1 401 Unauthorized
 
 ### Expiry
 
-Send `X-Bin-TTL: <seconds>` on create and the Bin expires that many seconds later. The Expiry comes back in `expiresAt` and in the `X-Bin-Expires-At` header. After it, the Bin answers `404` and is deleted by the hourly sweep.
+Send `X-Bin-TTL: <seconds>` on create and the Bin expires that many seconds later. The Expiry comes back in `expiresAt` and in the `X-Bin-Expires-At` header.
 
 ```sh
 curl -i -X POST "$BASE/bins" \
@@ -160,7 +159,7 @@ X-Bin-Expires-At: 2026-10-10T12:00:00.000Z
 {"id":"P159twtqmCe98Lc4dKigT","writeKey":"kj_w_t4R…","private":false,"createdAt":"2026-10-09T12:00:00.000Z","expiresAt":"2026-10-10T12:00:00.000Z"}
 ```
 
-The TTL must be a positive integer of seconds, and not above the Instance's maximum. An Instance can also set a default TTL for Bins created without the header (the public demo keeps every Bin for at most 30 days). The Expiry can't be changed after creation.
+The TTL must be a positive integer of seconds, and not above the Instance's maximum. An Instance can also set a default TTL for Bins created without the header. The Expiry can't be changed after creation.
 
 ### Errors
 
@@ -184,13 +183,13 @@ The codes are `invalid_json`, `invalid_ttl` (400), `unauthorized` (401), `forbid
 
 ## Deploy your own Instance
 
-keepjson runs in your own Cloudflare account: you deploy it there with your own D1 database, and you set the limits (Bin size, Expiry, rate limits, CORS origins). [`docs/deploy.md`](./docs/deploy.md) walks through creating the D1 database, running the migrations, setting the vars, deploying and updating.
+keepjson runs in your own Cloudflare account: you deploy it there with your own D1 database, and you set the limits (Bin size, Expiry, rate limits, CORS origins). [`Deployment Instructions`](./docs/deploy.md) walks through creating the D1 database, running the migrations, setting the vars, deploying and updating.
 
 ### Deploy with a coding agent
 
 Point your coding agent (Claude Code, Codex, Cursor, …) at this repo and ask it to deploy keepjson, for example:
 
-> Read `AGENTS.md` and deploy keepjson to my Cloudflare account, following `docs/deploy.md`.
+> Deploy keepjson to my Cloudflare account, following `docs/deploy.md`.
 
 [`AGENTS.md`](./AGENTS.md) tells the agent to follow `docs/deploy.md`, to ask you before it creates or changes anything in your account, and to leave `wrangler login` to you. You still need a Cloudflare account.
 
