@@ -186,6 +186,14 @@ The codes are `invalid_json`, `invalid_ttl` (400), `unauthorized` (401), `forbid
 
 keepjson runs in your own Cloudflare account: you deploy it there with your own D1 database, and you set the limits (Bin size, Expiry, rate limits, CORS origins). [`docs/deploy.md`](./docs/deploy.md) walks through creating the D1 database, running the migrations, setting the vars, deploying and updating.
 
+### Deploy with a coding agent
+
+Point your coding agent (Claude Code, Codex, Cursor, …) at this repo and ask it to deploy keepjson, for example:
+
+> Read `AGENTS.md` and deploy keepjson to my Cloudflare account, following `docs/deploy.md`.
+
+[`AGENTS.md`](./AGENTS.md) tells the agent to follow `docs/deploy.md`, to ask you before it creates or changes anything in your account, and to leave `wrangler login` to you. You still need a Cloudflare account.
+
 ## Docs
 
 - [`CONTEXT.md`](./CONTEXT.md): domain vocabulary

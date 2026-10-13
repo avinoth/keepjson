@@ -1,16 +1,19 @@
 # Working on keepjson
 
-keepjson is a Hono app on Cloudflare Workers + D1 that stores JSON Bins without accounts. The repo is in its outline stage: the work is defined in `docs/TODO.md`.
+keepjson is a Hono app on Cloudflare Workers + D1 that stores JSON Bins without accounts. Read `README.md` for what it does.
 
-## Before you change anything
+## Which job is this?
 
-1. Read `CONTEXT.md` (vocabulary).
-2. Take the **first unticked task** in `docs/TODO.md`. Don't skip ahead or merge tasks.
+- **Deploying or running an Instance** (setup, D1, migrations, vars, `wrangler deploy`, the demo environment): follow `docs/deploy.md` step by step and skip the sections below. Don't change code or commit.
+  - Ask the user to run `pnpm exec wrangler login` themselves (suggest `! pnpm exec wrangler login`); it is interactive and needs their Cloudflare account.
+  - Before `wrangler d1 create`, `migrations apply --remote` or `deploy`, tell the user what it will change in their account and wait for a go-ahead.
+  - Put the printed `database_id` into `wrangler.jsonc` as the guide says. Don't invent values for vars the user hasn't chosen: ask, or keep the defaults.
+  - Finish by checking `GET /health` on the deployed URL.
+- **Changing the code**: read `CONTEXT.md` (vocabulary), then follow the rest of this file.
 
 ## How to work
 
 - Write the tests first. Tests run in `@cloudflare/vitest-plugin` (formerly `@cloudflare/vitest-pool-workers`) against a real local D1. Don't mock D1.
-- One TODO task = one commit. Tick its boxes in `docs/TODO.md` in that same commit.
 - `pnpm check` must pass before you commit.
 - All SQL goes in `src/bins/repository.ts`. Handlers don't build SQL.
 - Never log, echo or persist a plaintext Write Key or Read Key.
