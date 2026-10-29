@@ -1,7 +1,7 @@
 {
   // The demo Instance, deployed as its own Worker with `pnpm exec wrangler deploy -c wrangler.demo.jsonc`.
   // Same code as wrangler.jsonc, but its own D1 database, its own rate limiter namespaces and vars that expire
-  // every Bin within 30 days. See docs/deploy.md → Demo Instance.
+  // every Bin within 4 hours. See docs/deploy.md → Demo Instance.
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "keepjson-demo",
   "main": "src/index.ts",
@@ -28,8 +28,8 @@
 
   "vars": {
     "MAX_BIN_BYTES": "102400",
-    "DEFAULT_TTL_SECONDS": "2592000",
-    "MAX_TTL_SECONDS": "2592000",
+    "DEFAULT_TTL_SECONDS": "14400",
+    "MAX_TTL_SECONDS": "14400",
     "CORS_ORIGINS": "*",
     "RATE_LIMIT_ENABLED": "true"
   }

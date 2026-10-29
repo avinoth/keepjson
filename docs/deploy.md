@@ -168,7 +168,7 @@ If you deployed with the button, your copy of the repo deploys itself on every p
 
 ## Demo Instance
 
-`wrangler.demo.jsonc` is a second, standalone Wrangler config for a demo Instance, with the demo values from the table in step 4: every Bin expires within 30 days (`DEFAULT_TTL_SECONDS` and `MAX_TTL_SECONDS` are `2592000`), so a free-tier D1 database stays small. It deploys the same code as a separate Worker, `keepjson-demo`, with its own D1 database (`keepjson-demo`) and its own rate limiter `namespace_id`s (`2001`, `2002`).
+`wrangler.demo.jsonc` is a second, standalone Wrangler config for a demo Instance, with the demo values from the table in step 4: every Bin expires within 4 hours (`DEFAULT_TTL_SECONDS` and `MAX_TTL_SECONDS` are `14400`), so a free-tier D1 database stays small. It deploys the same code as a separate Worker, `keepjson-demo`, with its own D1 database (`keepjson-demo`) and its own rate limiter `namespace_id`s (`2001`, `2002`).
 
 Wrangler reads `wrangler.jsonc` by default, so the demo only happens when you pass `-c wrangler.demo.jsonc` (`--config`). To deploy it:
 

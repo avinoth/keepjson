@@ -7,8 +7,8 @@ describe("demo Instance", () => {
   it("parses to the demo Instance values in docs/deploy.md", () => {
     expect(parseConfig(env.TEST_DEMO_VARS)).toEqual({
       maxBinBytes: 102_400,
-      defaultTtlSeconds: 2_592_000,
-      maxTtlSeconds: 2_592_000,
+      defaultTtlSeconds: 14_400,
+      maxTtlSeconds: 14_400,
       corsOrigins: "*",
       rateLimitEnabled: true,
     });
