@@ -27,9 +27,9 @@
   "triggers": { "crons": ["0 * * * *"] },
 
   "vars": {
-    "MAX_BIN_BYTES": "102400",
-    "DEFAULT_TTL_SECONDS": "14400",
-    "MAX_TTL_SECONDS": "14400",
+    "MAX_BIN_BYTES": "10240",
+    "DEFAULT_TTL_SECONDS": "60",
+    "MAX_TTL_SECONDS": "60",
     "CORS_ORIGINS": "*",
     "RATE_LIMIT_ENABLED": "true"
   }
